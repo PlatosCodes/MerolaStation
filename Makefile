@@ -13,5 +13,7 @@ migrateup:
 migratedown: 
 	migrate -path db/migration -database "postgresql://root:bluecomet@localhost:5432/merola_station?sslmode=disable" -verbose down
 
+sqlc:
+	sqlc generate
 
-.PHONY: postgres createdb dropdb migrateup migratedown
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc
