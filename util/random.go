@@ -31,6 +31,17 @@ func RandomString(n int) string {
 	return sb.String()
 }
 
+func RandomUsername() string {
+	return RandomString(6)
+}
+
+func RandomEmail() string {
+	return fmt.Sprintf("%s@email.com", RandomString(6))
+}
+
+func RandomTrainName() string {
+	return RandomString(6)
+}
 func RandomYear() int32 {
 	return 1900 + rand.Int31n(2023-1900+1)
 }
@@ -39,23 +50,12 @@ func RandomModelNumber() string {
 	return RandomString(5)
 }
 
-func RandomUsername() string {
-	return RandomString(6)
-}
-
-func RandomTrainName() string {
-	return RandomString(6)
-}
-
-func RandomGauge() string {
-	gauges := []string{"O", "O27", "HO"}
-	return gauges[rand.Intn(len(gauges))]
-}
-
 func RandomTrainRequest() (string, string) {
 	return RandomModelNumber(), RandomTrainName()
 }
 
-func RandomEmail() string {
-	return fmt.Sprintf("%s@email.com", RandomString(6))
-}
+// //For future use for ENUMs such as this
+// func RandomGauge() string {
+// 	gauges := []string{"O", "O27", "HO"}
+// 	return gauges[rand.Intn(len(gauges))]
+// }

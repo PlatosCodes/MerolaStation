@@ -41,11 +41,11 @@ func TestGetUserCollectionTrains(t *testing.T) {
 		Offset: 0,
 	}
 
-	wishlistTrains, err := testQueries.GetUserCollectionTrains(context.Background(), arg)
+	collectionTrains, err := testQueries.GetUserCollectionTrains(context.Background(), arg)
 	require.NoError(t, err)
-	require.Len(t, wishlistTrains, 1)
+	require.Len(t, collectionTrains, 1)
 
-	gotCollectionTrain := wishlistTrains[0]
+	gotCollectionTrain := collectionTrains[0]
 	require.Equal(t, user.ID, gotCollectionTrain.UserID)
 	require.Equal(t, train.ID, gotCollectionTrain.TrainID)
 }

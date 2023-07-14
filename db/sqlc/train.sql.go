@@ -15,7 +15,7 @@ INSERT INTO trains (
   name
 ) VALUES (
   $1, $2
-) RETURNING id, model_number, name, value, version, created_at
+) RETURNING id, model_number, name, value, created_at, version, last_edited_at
 `
 
 type CreateTrainParams struct {
@@ -31,8 +31,9 @@ func (q *Queries) CreateTrain(ctx context.Context, arg CreateTrainParams) (Train
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
-		&i.Version,
 		&i.CreatedAt,
+		&i.Version,
+		&i.LastEditedAt,
 	)
 	return i, err
 }
@@ -47,7 +48,7 @@ func (q *Queries) DeleteTrain(ctx context.Context, id int64) error {
 }
 
 const getTrain = `-- name: GetTrain :one
-SELECT id, model_number, name, value, version, created_at FROM trains
+SELECT id, model_number, name, value, created_at, version, last_edited_at FROM trains
 WHERE id = $1 LIMIT 1
 `
 
@@ -59,14 +60,15 @@ func (q *Queries) GetTrain(ctx context.Context, id int64) (Train, error) {
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
-		&i.Version,
 		&i.CreatedAt,
+		&i.Version,
+		&i.LastEditedAt,
 	)
 	return i, err
 }
 
 const getTrainByModel = `-- name: GetTrainByModel :one
-SELECT id, model_number, name, value, version, created_at FROM trains
+SELECT id, model_number, name, value, created_at, version, last_edited_at FROM trains
 WHERE model_number = $1 LIMIT 1
 `
 
@@ -78,14 +80,15 @@ func (q *Queries) GetTrainByModel(ctx context.Context, modelNumber string) (Trai
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
-		&i.Version,
 		&i.CreatedAt,
+		&i.Version,
+		&i.LastEditedAt,
 	)
 	return i, err
 }
 
 const getTrainByName = `-- name: GetTrainByName :one
-SELECT id, model_number, name, value, version, created_at FROM trains
+SELECT id, model_number, name, value, created_at, version, last_edited_at FROM trains
 WHERE name = $1 LIMIT 1
 `
 
@@ -97,14 +100,15 @@ func (q *Queries) GetTrainByName(ctx context.Context, name string) (Train, error
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
-		&i.Version,
 		&i.CreatedAt,
+		&i.Version,
+		&i.LastEditedAt,
 	)
 	return i, err
 }
 
 const listTrains = `-- name: ListTrains :many
-SELECT id, model_number, name, value, version, created_at FROM trains
+SELECT id, model_number, name, value, created_at, version, last_edited_at FROM trains
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -129,8 +133,9 @@ func (q *Queries) ListTrains(ctx context.Context, arg ListTrainsParams) ([]Train
 			&i.ModelNumber,
 			&i.Name,
 			&i.Value,
-			&i.Version,
 			&i.CreatedAt,
+			&i.Version,
+			&i.LastEditedAt,
 		); err != nil {
 			return nil, err
 		}

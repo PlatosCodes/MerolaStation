@@ -15,7 +15,7 @@ INSERT INTO wishlist_trains (
   train_id
 ) VALUES (
   $1, $2
-) RETURNING user_id, train_id, created_at
+) RETURNING id, user_id, train_id, created_at
 `
 
 type CreateWishlistTrainParams struct {
@@ -26,7 +26,12 @@ type CreateWishlistTrainParams struct {
 func (q *Queries) CreateWishlistTrain(ctx context.Context, arg CreateWishlistTrainParams) (WishlistTrain, error) {
 	row := q.db.QueryRowContext(ctx, createWishlistTrain, arg.UserID, arg.TrainID)
 	var i WishlistTrain
-	err := row.Scan(&i.UserID, &i.TrainID, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TrainID,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
@@ -45,7 +50,7 @@ func (q *Queries) DeleteWishlistTrain(ctx context.Context, arg DeleteWishlistTra
 }
 
 const getUserWishlistTrains = `-- name: GetUserWishlistTrains :many
-SELECT user_id, train_id, created_at FROM wishlist_trains
+SELECT id, user_id, train_id, created_at FROM wishlist_trains
 WHERE user_id = $1
 LIMIT $2
 OFFSET $3
@@ -66,7 +71,12 @@ func (q *Queries) GetUserWishlistTrains(ctx context.Context, arg GetUserWishlist
 	items := []WishlistTrain{}
 	for rows.Next() {
 		var i WishlistTrain
-		if err := rows.Scan(&i.UserID, &i.TrainID, &i.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.TrainID,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -81,7 +91,7 @@ func (q *Queries) GetUserWishlistTrains(ctx context.Context, arg GetUserWishlist
 }
 
 const listWishlistTrains = `-- name: ListWishlistTrains :many
-SELECT user_id, train_id, created_at FROM wishlist_trains
+SELECT id, user_id, train_id, created_at FROM wishlist_trains
 ORDER BY user_id
 LIMIT $1
 OFFSET $2
@@ -101,7 +111,12 @@ func (q *Queries) ListWishlistTrains(ctx context.Context, arg ListWishlistTrains
 	items := []WishlistTrain{}
 	for rows.Next() {
 		var i WishlistTrain
-		if err := rows.Scan(&i.UserID, &i.TrainID, &i.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.TrainID,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

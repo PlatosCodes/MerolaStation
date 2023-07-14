@@ -15,7 +15,7 @@ INSERT INTO collection_trains (
   train_id
 ) VALUES (
   $1, $2
-) RETURNING user_id, train_id, created_at
+) RETURNING id, user_id, train_id, created_at
 `
 
 type CreateCollectionTrainParams struct {
@@ -26,7 +26,12 @@ type CreateCollectionTrainParams struct {
 func (q *Queries) CreateCollectionTrain(ctx context.Context, arg CreateCollectionTrainParams) (CollectionTrain, error) {
 	row := q.db.QueryRowContext(ctx, createCollectionTrain, arg.UserID, arg.TrainID)
 	var i CollectionTrain
-	err := row.Scan(&i.UserID, &i.TrainID, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TrainID,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
@@ -45,7 +50,7 @@ func (q *Queries) DeleteCollectionTrain(ctx context.Context, arg DeleteCollectio
 }
 
 const getUserCollectionTrains = `-- name: GetUserCollectionTrains :many
-SELECT user_id, train_id, created_at FROM collection_trains
+SELECT id, user_id, train_id, created_at FROM collection_trains
 WHERE user_id = $1
 LIMIT $2
 OFFSET $3
@@ -66,7 +71,12 @@ func (q *Queries) GetUserCollectionTrains(ctx context.Context, arg GetUserCollec
 	items := []CollectionTrain{}
 	for rows.Next() {
 		var i CollectionTrain
-		if err := rows.Scan(&i.UserID, &i.TrainID, &i.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.TrainID,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -81,7 +91,7 @@ func (q *Queries) GetUserCollectionTrains(ctx context.Context, arg GetUserCollec
 }
 
 const listCollectionTrains = `-- name: ListCollectionTrains :many
-SELECT user_id, train_id, created_at FROM collection_trains
+SELECT id, user_id, train_id, created_at FROM collection_trains
 ORDER BY user_id
 LIMIT $1
 OFFSET $2
@@ -101,7 +111,12 @@ func (q *Queries) ListCollectionTrains(ctx context.Context, arg ListCollectionTr
 	items := []CollectionTrain{}
 	for rows.Next() {
 		var i CollectionTrain
-		if err := rows.Scan(&i.UserID, &i.TrainID, &i.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.TrainID,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
