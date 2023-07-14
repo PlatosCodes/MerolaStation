@@ -84,6 +84,25 @@ func (q *Queries) GetTrainByModel(ctx context.Context, modelNumber string) (Trai
 	return i, err
 }
 
+const getTrainByName = `-- name: GetTrainByName :one
+SELECT id, model_number, name, value, version, created_at FROM trains
+WHERE name = $1 LIMIT 1
+`
+
+func (q *Queries) GetTrainByName(ctx context.Context, name string) (Train, error) {
+	row := q.db.QueryRowContext(ctx, getTrainByName, name)
+	var i Train
+	err := row.Scan(
+		&i.ID,
+		&i.ModelNumber,
+		&i.Name,
+		&i.Value,
+		&i.Version,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const listTrains = `-- name: ListTrains :many
 SELECT id, model_number, name, value, version, created_at FROM trains
 ORDER BY id
@@ -127,7 +146,7 @@ func (q *Queries) ListTrains(ctx context.Context, arg ListTrainsParams) ([]Train
 }
 
 const updateTrainValue = `-- name: UpdateTrainValue :exec
-UPDATE trains SET value = $2
+UPDATE trains SET value = $2, version = version + 1
 WHERE id = $1
 `
 

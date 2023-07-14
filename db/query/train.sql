@@ -14,6 +14,10 @@ WHERE id = $1 LIMIT 1;
 SELECT * FROM trains
 WHERE model_number = $1 LIMIT 1;
 
+-- name: GetTrainByName :one
+SELECT * FROM trains
+WHERE name = $1 LIMIT 1;
+
 -- name: ListTrains :many
 SELECT * FROM trains
 ORDER BY id
@@ -21,7 +25,7 @@ LIMIT $1
 OFFSET $2;
 
 -- name: UpdateTrainValue :exec
-UPDATE trains SET value = $2
+UPDATE trains SET value = $2, version = version + 1
 WHERE id = $1;
 
 -- name: DeleteTrain :exec
