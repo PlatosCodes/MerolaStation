@@ -41,12 +41,11 @@ jobs:
         sudo mv migrate /usr/bin/migrate
         which migrate
 
-    - name: Set up PostgreSQL extension
+    - name: Set up PostgreSQL citext extension
       run: docker exec -it postgres15 psql --username=root merola_station -c "CREATE EXTENSION IF NOT EXISTS citext;"
 
     - name: Run migrations
       run: make migrateup
   
-
     - name: Test
       run: make test
