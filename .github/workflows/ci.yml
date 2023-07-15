@@ -41,8 +41,21 @@ jobs:
         sudo mv migrate /usr/bin/migrate
         which migrate
 
-    - name: Set up PostgreSQL citext extension
-      run: psql --host=postgres --username=root --dbname=MerolaStation -c "CREATE EXTENSION IF NOT EXISTS citext;"
+    - name: Add citext extension to Postgres
+      run: |
+        PGPASSWORD=bluecomet psql -h localhost -U root -d MerolaStation -c "CREATE EXTENSION IF NOT EXISTS citext;"
+        
+
+    - name: Install PostgreSQL client
+      run: sudo apt-get -yqq install postgresql-client
+  
+    - name: Wait for PostgreSQL to start
+      run: |
+        until PGPASSWORD=bluecomet psql -h localhost -U root -d merola_station -c '\q'; do
+        echo "Postgres is unavailable - sleeping"
+        sleep 1
+        done
+
 
     - name: Run migrations
       run: make migrateup
