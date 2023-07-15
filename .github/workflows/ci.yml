@@ -42,7 +42,7 @@ jobs:
         which migrate
 
     - name: Set up PostgreSQL citext extension
-      run: docker exec -it postgres15 psql --username=root merola_station -c "CREATE EXTENSION IF NOT EXISTS citext;"
+      run: psql --host=postgres --username=root --dbname=MerolaStation -c "CREATE EXTENSION IF NOT EXISTS citext;"
 
     - name: Run migrations
       run: make migrateup
