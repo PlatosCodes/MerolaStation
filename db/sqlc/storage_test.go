@@ -57,3 +57,65 @@ func TestRegisterTx(t *testing.T) {
 		require.NoError(t, err)
 	}
 }
+
+func TestTradeTxDeadlock(t *testing.T) {
+	storage := NewStorage(testDB)
+
+	OfferedTrain := createRandomCollectionTrain(t)
+	RequestedTrain := createRandomCollectionTrain(t)
+
+	// run n concurrent trade transactions to ensure transaction works well
+	n := 10
+
+	errs := make(chan error)
+	results := make(chan TradeTxResult)
+
+	for i := 0; i < n; i++ {
+
+		if i%2 == 1 {
+			OfferedTrain.UserID = RequestedTrain.UserID
+			RequestedTrain.UserID = OfferedTrain.UserID
+		}
+
+		go func() {
+			result, err := storage.TradeTx(context.Background(), TradeTxParams{
+				OfferedTrain:   OfferedTrain,
+				RequestedTrain: RequestedTrain,
+			})
+
+			errs <- err
+			results <- result
+
+		}()
+	}
+
+	//check results
+	for i := 0; i < n; i++ {
+		err := <-errs
+		require.NoError(t, err)
+
+		result := <-results
+		require.NotEmpty(t, result)
+	}
+
+	//check final collection_trains
+	updatedCollectionTrain1, err := storage.GetCollectionTrain(context.Background(),
+		GetCollectionTrainParams{
+			UserID:  OfferedTrain.UserID,
+			TrainID: OfferedTrain.TrainID,
+		})
+	require.NoError(t, err)
+
+	updatedCollectionTrain2, err := storage.GetCollectionTrain(context.Background(),
+		GetCollectionTrainParams{
+			UserID:  RequestedTrain.UserID,
+			TrainID: RequestedTrain.TrainID,
+		})
+	require.NoError(t, err)
+
+	require.Equal(t, OfferedTrain.UserID, updatedCollectionTrain1.UserID)
+	require.Equal(t, RequestedTrain.UserID, updatedCollectionTrain2.UserID)
+	require.Equal(t, OfferedTrain.TrainID, updatedCollectionTrain1.TrainID)
+	require.Equal(t, RequestedTrain.TrainID, updatedCollectionTrain2.TrainID)
+
+}

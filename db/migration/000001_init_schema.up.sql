@@ -23,7 +23,8 @@ CREATE TABLE "collection_trains" (
   "id" bigserial PRIMARY KEY,
   "user_id" bigint NOT NULL,
   "train_id" bigint NOT NULL,
-  "created_at" timestamptz NOT NULL DEFAULT (now())
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "times_traded" bigint NOT NULL DEFAULT 1
 );
 
 CREATE TABLE "wishlist_trains" (

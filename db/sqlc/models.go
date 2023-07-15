@@ -9,10 +9,11 @@ import (
 )
 
 type CollectionTrain struct {
-	ID        int64     `json:"id"`
-	UserID    int64     `json:"user_id"`
-	TrainID   int64     `json:"train_id"`
-	CreatedAt time.Time `json:"created_at"`
+	ID          int64     `json:"id"`
+	UserID      int64     `json:"user_id"`
+	TrainID     int64     `json:"train_id"`
+	CreatedAt   time.Time `json:"created_at"`
+	TimesTraded int64     `json:"times_traded"`
 }
 
 type TradeOffer struct {

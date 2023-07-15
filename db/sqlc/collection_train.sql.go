@@ -15,7 +15,7 @@ INSERT INTO collection_trains (
   train_id
 ) VALUES (
   $1, $2
-) RETURNING id, user_id, train_id, created_at
+) RETURNING id, user_id, train_id, created_at, times_traded
 `
 
 type CreateCollectionTrainParams struct {
@@ -31,6 +31,7 @@ func (q *Queries) CreateCollectionTrain(ctx context.Context, arg CreateCollectio
 		&i.UserID,
 		&i.TrainID,
 		&i.CreatedAt,
+		&i.TimesTraded,
 	)
 	return i, err
 }
@@ -49,49 +50,96 @@ func (q *Queries) DeleteCollectionTrain(ctx context.Context, arg DeleteCollectio
 	return err
 }
 
-const getUserCollectionTrains = `-- name: GetUserCollectionTrains :many
-SELECT id, user_id, train_id, created_at FROM collection_trains
-WHERE user_id = $1
-LIMIT $2
-OFFSET $3
+const getCollectionTrain = `-- name: GetCollectionTrain :one
+SELECT id, user_id, train_id, created_at, times_traded FROM collection_trains
+WHERE user_id = $1 AND train_id = $2
+LIMIT 1
 `
 
-type GetUserCollectionTrainsParams struct {
-	UserID int64 `json:"user_id"`
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+type GetCollectionTrainParams struct {
+	UserID  int64 `json:"user_id"`
+	TrainID int64 `json:"train_id"`
 }
 
-func (q *Queries) GetUserCollectionTrains(ctx context.Context, arg GetUserCollectionTrainsParams) ([]CollectionTrain, error) {
-	rows, err := q.db.QueryContext(ctx, getUserCollectionTrains, arg.UserID, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []CollectionTrain{}
-	for rows.Next() {
-		var i CollectionTrain
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.TrainID,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) GetCollectionTrain(ctx context.Context, arg GetCollectionTrainParams) (CollectionTrain, error) {
+	row := q.db.QueryRowContext(ctx, getCollectionTrain, arg.UserID, arg.TrainID)
+	var i CollectionTrain
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TrainID,
+		&i.CreatedAt,
+		&i.TimesTraded,
+	)
+	return i, err
+}
+
+const getCollectionTrainByID = `-- name: GetCollectionTrainByID :one
+SELECT id, user_id, train_id, created_at, times_traded FROM collection_trains
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetCollectionTrainByID(ctx context.Context, id int64) (CollectionTrain, error) {
+	row := q.db.QueryRowContext(ctx, getCollectionTrainByID, id)
+	var i CollectionTrain
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TrainID,
+		&i.CreatedAt,
+		&i.TimesTraded,
+	)
+	return i, err
+}
+
+const getCollectionTrainforUpdate = `-- name: GetCollectionTrainforUpdate :one
+SELECT id, user_id, train_id, created_at, times_traded FROM collection_trains
+WHERE user_id = $1 AND train_id = $2
+LIMIT 1
+FOR NO KEY UPDATE
+`
+
+type GetCollectionTrainforUpdateParams struct {
+	UserID  int64 `json:"user_id"`
+	TrainID int64 `json:"train_id"`
+}
+
+func (q *Queries) GetCollectionTrainforUpdate(ctx context.Context, arg GetCollectionTrainforUpdateParams) (CollectionTrain, error) {
+	row := q.db.QueryRowContext(ctx, getCollectionTrainforUpdate, arg.UserID, arg.TrainID)
+	var i CollectionTrain
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TrainID,
+		&i.CreatedAt,
+		&i.TimesTraded,
+	)
+	return i, err
+}
+
+const getCollectionTrainforUpdateByID = `-- name: GetCollectionTrainforUpdateByID :one
+SELECT id, user_id, train_id, created_at, times_traded FROM collection_trains
+WHERE id = $1
+LIMIT 1
+FOR NO KEY UPDATE
+`
+
+func (q *Queries) GetCollectionTrainforUpdateByID(ctx context.Context, id int64) (CollectionTrain, error) {
+	row := q.db.QueryRowContext(ctx, getCollectionTrainforUpdateByID, id)
+	var i CollectionTrain
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TrainID,
+		&i.CreatedAt,
+		&i.TimesTraded,
+	)
+	return i, err
 }
 
 const listCollectionTrains = `-- name: ListCollectionTrains :many
-SELECT id, user_id, train_id, created_at FROM collection_trains
+SELECT id, user_id, train_id, created_at, times_traded FROM collection_trains
 ORDER BY user_id
 LIMIT $1
 OFFSET $2
@@ -116,6 +164,7 @@ func (q *Queries) ListCollectionTrains(ctx context.Context, arg ListCollectionTr
 			&i.UserID,
 			&i.TrainID,
 			&i.CreatedAt,
+			&i.TimesTraded,
 		); err != nil {
 			return nil, err
 		}
@@ -128,4 +177,72 @@ func (q *Queries) ListCollectionTrains(ctx context.Context, arg ListCollectionTr
 		return nil, err
 	}
 	return items, nil
+}
+
+const listUserCollectionTrains = `-- name: ListUserCollectionTrains :many
+SELECT id, user_id, train_id, created_at, times_traded FROM collection_trains
+WHERE user_id = $1
+ORDER BY id
+LIMIT $2
+OFFSET $3
+`
+
+type ListUserCollectionTrainsParams struct {
+	UserID int64 `json:"user_id"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListUserCollectionTrains(ctx context.Context, arg ListUserCollectionTrainsParams) ([]CollectionTrain, error) {
+	rows, err := q.db.QueryContext(ctx, listUserCollectionTrains, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []CollectionTrain{}
+	for rows.Next() {
+		var i CollectionTrain
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.TrainID,
+			&i.CreatedAt,
+			&i.TimesTraded,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateCollectionTrain = `-- name: UpdateCollectionTrain :one
+UPDATE collection_trains 
+SET user_id = $2, times_traded = times_traded + 1
+WHERE id = $1
+RETURNING id, user_id, train_id, created_at, times_traded
+`
+
+type UpdateCollectionTrainParams struct {
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
+}
+
+func (q *Queries) UpdateCollectionTrain(ctx context.Context, arg UpdateCollectionTrainParams) (CollectionTrain, error) {
+	row := q.db.QueryRowContext(ctx, updateCollectionTrain, arg.ID, arg.UserID)
+	var i CollectionTrain
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TrainID,
+		&i.CreatedAt,
+		&i.TimesTraded,
+	)
+	return i, err
 }
