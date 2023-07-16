@@ -14,11 +14,11 @@ jobs:
 
     services:
         postgres:
-          image: postgres:alpine
+          image: postgres:15
           env:
             POSTGRES_USER: root
             POSTGRES_PASSWORD: bluecomet
-            POSTGRES_DB: MerolaStation
+            POSTGRES_DB: merola_station
           ports:
             - 5432:5432
           options: >-
