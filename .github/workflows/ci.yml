@@ -43,7 +43,7 @@ jobs:
 
     - name: Add citext extension to Postgres
       run: |
-        PGPASSWORD=bluecomet psql -h localhost -U root -d MerolaStation -c "CREATE EXTENSION IF NOT EXISTS citext;"
+        PGPASSWORD=bluecomet psql -h localhost -U root -d merola_station -c "CREATE EXTENSION IF NOT EXISTS citext;"
 
     - name: Run migrations
       run: make migrateup
