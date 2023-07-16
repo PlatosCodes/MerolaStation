@@ -6,24 +6,31 @@ import (
 	"fmt"
 )
 
-// Storage provides all functions to execure db queries and transactions using
-// composition and extending the functionality of queries for single db operations
-type Storage struct {
-	*Queries
-	db *sql.DB
+// Store provides all functions to execure db queries and transactions
+// Uses composition and extending the functionality of queries for single db operations
+type Store interface {
+	Querier
+	RegisterTx(ctx context.Context, arg CreateUserParams) (RegisterTxResult, error)
+	TradeTx(ctx context.Context, arg TradeTxParams) (TradeTxResult, error)
 }
 
-// NewStorage creates a new Storage
-func NewStorage(db *sql.DB) *Storage {
-	return &Storage{
+// SQLStore provides all functions to execute SQL queries and transactions
+type SQLStore struct {
+	db *sql.DB
+	*Queries
+}
+
+// NewStore creates a new Store
+func NewStore(db *sql.DB) Store {
+	return &SQLStore{
 		db:      db,
 		Queries: New(db),
 	}
 }
 
 // execTx executes a function within a database transaction
-func (storage *Storage) execTx(ctx context.Context, fn func(*Queries) error) error {
-	tx, err := storage.db.BeginTx(ctx, nil)
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
+	tx, err := store.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -60,10 +67,10 @@ type RegisterTxResult struct {
 // multi-operation database transaction features later
 // **RegisterTxResult is also rather useless for now, but will be useful when
 // we have actual transcations occuring.
-func (storage *Storage) RegisterTx(ctx context.Context, arg CreateUserParams) (RegisterTxResult, error) {
+func (store *SQLStore) RegisterTx(ctx context.Context, arg CreateUserParams) (RegisterTxResult, error) {
 	var result RegisterTxResult
 
-	err := storage.execTx(ctx, func(q *Queries) error {
+	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
 		result.User, err = q.CreateUser(ctx, arg)
@@ -99,10 +106,10 @@ type TradeTxResult struct {
 // TradeTx performs a train trade between users
 // It creates a trade record, verifies the collection trains of the two users,
 // and updates the train owner for each collection train.
-func (storage *Storage) TradeTx(ctx context.Context, arg TradeTxParams) (TradeTxResult, error) {
+func (store *SQLStore) TradeTx(ctx context.Context, arg TradeTxParams) (TradeTxResult, error) {
 	var result TradeTxResult
 
-	err := storage.execTx(ctx, func(q *Queries) error {
+	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
 		// Create trade record

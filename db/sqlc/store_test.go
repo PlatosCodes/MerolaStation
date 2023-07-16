@@ -10,7 +10,7 @@ import (
 )
 
 func TestRegisterTx(t *testing.T) {
-	store := NewStorage(testDB)
+	store := NewStore(testDB)
 
 	hashedPassword, err := util.HashPassword("secret")
 	require.NoError(t, err)
@@ -59,7 +59,7 @@ func TestRegisterTx(t *testing.T) {
 }
 
 func TestTradeTx(t *testing.T) {
-	storage := NewStorage(testDB)
+	store := NewStore(testDB)
 
 	OfferedTrain := createRandomCollectionTrain(t)
 	RequestedTrain := createRandomCollectionTrain(t)
@@ -78,7 +78,7 @@ func TestTradeTx(t *testing.T) {
 		}
 
 		go func() {
-			result, err := storage.TradeTx(context.Background(), TradeTxParams{
+			result, err := store.TradeTx(context.Background(), TradeTxParams{
 				OfferedTrain:   OfferedTrain,
 				RequestedTrain: RequestedTrain,
 			})
@@ -104,20 +104,20 @@ func TestTradeTx(t *testing.T) {
 		require.Equal(t, OfferedTrain.TrainID, transactionRecord.OfferedTrain)
 		require.Equal(t, RequestedTrain.TrainID, transactionRecord.RequestedTrain)
 
-		_, err = storage.GetTradeTransaction(context.Background(), transactionRecord.ID)
+		_, err = store.GetTradeTransaction(context.Background(), transactionRecord.ID)
 		require.NoError(t, err)
 
 	}
 
 	//check final collection_trains
-	updatedCollectionTrain1, err := storage.GetCollectionTrain(context.Background(),
+	updatedCollectionTrain1, err := store.GetCollectionTrain(context.Background(),
 		GetCollectionTrainParams{
 			UserID:  OfferedTrain.UserID,
 			TrainID: OfferedTrain.TrainID,
 		})
 	require.NoError(t, err)
 
-	updatedCollectionTrain2, err := storage.GetCollectionTrain(context.Background(),
+	updatedCollectionTrain2, err := store.GetCollectionTrain(context.Background(),
 		GetCollectionTrainParams{
 			UserID:  RequestedTrain.UserID,
 			TrainID: RequestedTrain.TrainID,
@@ -131,7 +131,7 @@ func TestTradeTx(t *testing.T) {
 }
 
 func TestTradeTxDeadlock(t *testing.T) {
-	storage := NewStorage(testDB)
+	store := NewStore(testDB)
 
 	OfferedTrain := createRandomCollectionTrain(t)
 	RequestedTrain := createRandomCollectionTrain(t)
@@ -150,7 +150,7 @@ func TestTradeTxDeadlock(t *testing.T) {
 		}
 
 		go func() {
-			result, err := storage.TradeTx(context.Background(), TradeTxParams{
+			result, err := store.TradeTx(context.Background(), TradeTxParams{
 				OfferedTrain:   OfferedTrain,
 				RequestedTrain: RequestedTrain,
 			})
@@ -171,14 +171,14 @@ func TestTradeTxDeadlock(t *testing.T) {
 	}
 
 	//check final collection_trains
-	updatedCollectionTrain1, err := storage.GetCollectionTrain(context.Background(),
+	updatedCollectionTrain1, err := store.GetCollectionTrain(context.Background(),
 		GetCollectionTrainParams{
 			UserID:  OfferedTrain.UserID,
 			TrainID: OfferedTrain.TrainID,
 		})
 	require.NoError(t, err)
 
-	updatedCollectionTrain2, err := storage.GetCollectionTrain(context.Background(),
+	updatedCollectionTrain2, err := store.GetCollectionTrain(context.Background(),
 		GetCollectionTrainParams{
 			UserID:  RequestedTrain.UserID,
 			TrainID: RequestedTrain.TrainID,
