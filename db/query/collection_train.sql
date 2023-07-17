@@ -28,7 +28,7 @@ WHERE user_id = $1 AND train_id = $2
 LIMIT 1
 FOR NO KEY UPDATE;
 
--- name: ListUserCollectionTrains :many
+-- name: ListUserCollection :many
 SELECT * FROM collection_trains
 WHERE user_id = $1
 ORDER BY id

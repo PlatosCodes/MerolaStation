@@ -27,10 +27,10 @@ OFFSET $3;
 -- name: ListAllUserTradeOffers :many
 SELECT * FROM trade_offers
 WHERE offered_train_owner = $1 
-OR requested_train_owner = $2
+OR requested_train_owner = $1
 ORDER BY id
-LIMIT $3
-OFFSET $4;
+LIMIT $2
+OFFSET $3;
 
 -- name: ListCollectionTrainTradeOffers :one
 SELECT * FROM trade_offers
@@ -39,7 +39,7 @@ ORDER BY id
 LIMIT $2
 OFFSET $3;
 
--- name: ListTradeOffers :one
+-- name: ListTrainTradeOffers :one
 SELECT * FROM trade_offers
 WHERE offered_train = $1 
 ORDER BY id

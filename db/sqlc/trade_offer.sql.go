@@ -75,26 +75,20 @@ func (q *Queries) GetTradeOfferByTradeID(ctx context.Context, id int64) (TradeOf
 const listAllUserTradeOffers = `-- name: ListAllUserTradeOffers :many
 SELECT id, offered_train, offered_train_owner, requested_train, requested_train_owner, created_at FROM trade_offers
 WHERE offered_train_owner = $1 
-OR requested_train_owner = $2
+OR requested_train_owner = $1
 ORDER BY id
-LIMIT $3
-OFFSET $4
+LIMIT $2
+OFFSET $3
 `
 
 type ListAllUserTradeOffersParams struct {
-	OfferedTrainOwner   int64 `json:"offered_train_owner"`
-	RequestedTrainOwner int64 `json:"requested_train_owner"`
-	Limit               int32 `json:"limit"`
-	Offset              int32 `json:"offset"`
+	OfferedTrainOwner int64 `json:"offered_train_owner"`
+	Limit             int32 `json:"limit"`
+	Offset            int32 `json:"offset"`
 }
 
 func (q *Queries) ListAllUserTradeOffers(ctx context.Context, arg ListAllUserTradeOffersParams) ([]TradeOffer, error) {
-	rows, err := q.db.QueryContext(ctx, listAllUserTradeOffers,
-		arg.OfferedTrainOwner,
-		arg.RequestedTrainOwner,
-		arg.Limit,
-		arg.Offset,
-	)
+	rows, err := q.db.QueryContext(ctx, listAllUserTradeOffers, arg.OfferedTrainOwner, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +145,7 @@ func (q *Queries) ListCollectionTrainTradeOffers(ctx context.Context, arg ListCo
 	return i, err
 }
 
-const listTradeOffers = `-- name: ListTradeOffers :one
+const listTrainTradeOffers = `-- name: ListTrainTradeOffers :one
 SELECT id, offered_train, offered_train_owner, requested_train, requested_train_owner, created_at FROM trade_offers
 WHERE offered_train = $1 
 ORDER BY id
@@ -159,14 +153,14 @@ LIMIT $2
 OFFSET $3
 `
 
-type ListTradeOffersParams struct {
+type ListTrainTradeOffersParams struct {
 	OfferedTrain int64 `json:"offered_train"`
 	Limit        int32 `json:"limit"`
 	Offset       int32 `json:"offset"`
 }
 
-func (q *Queries) ListTradeOffers(ctx context.Context, arg ListTradeOffersParams) (TradeOffer, error) {
-	row := q.db.QueryRowContext(ctx, listTradeOffers, arg.OfferedTrain, arg.Limit, arg.Offset)
+func (q *Queries) ListTrainTradeOffers(ctx context.Context, arg ListTrainTradeOffersParams) (TradeOffer, error) {
+	row := q.db.QueryRowContext(ctx, listTrainTradeOffers, arg.OfferedTrain, arg.Limit, arg.Offset)
 	var i TradeOffer
 	err := row.Scan(
 		&i.ID,

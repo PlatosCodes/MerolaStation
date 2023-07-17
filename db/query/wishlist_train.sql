@@ -6,13 +6,13 @@ INSERT INTO wishlist_trains (
   $1, $2
 ) RETURNING *;
 
--- name: GetUserWishlistTrains :many
+-- name: ListUserWishlist :many
 SELECT * FROM wishlist_trains
 WHERE user_id = $1
 LIMIT $2
 OFFSET $3;
 
--- name: ListWishlistTrains :many
+-- name: ListWishlists :many
 SELECT * FROM wishlist_trains
 ORDER BY user_id
 LIMIT $1

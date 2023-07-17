@@ -35,13 +35,13 @@ func TestCreateCollectionTrain(t *testing.T) {
 func TestGetUserCollectionTrains(t *testing.T) {
 	ct := createRandomCollectionTrain(t)
 
-	arg := ListUserCollectionTrainsParams{
+	arg := ListUserCollectionParams{
 		UserID: ct.UserID,
 		Limit:  1,
 		Offset: 0,
 	}
 
-	collectionTrains, err := testQueries.ListUserCollectionTrains(context.Background(), arg)
+	collectionTrains, err := testQueries.ListUserCollection(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, collectionTrains, 1)
 
@@ -79,7 +79,7 @@ func TestDeleteCollectionTrain(t *testing.T) {
 	ct := createRandomCollectionTrain(t)
 	page_id := int32(util.RandomInt(1, 100))
 	page_size := int32(util.RandomInt(1, 1000))
-	arg := ListUserCollectionTrainsParams{
+	arg := ListUserCollectionParams{
 		UserID: ct.UserID,
 		Limit:  page_id,
 		Offset: page_size,
@@ -90,12 +90,12 @@ func TestDeleteCollectionTrain(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	collectionTrains, err := testQueries.ListUserCollectionTrains(context.Background(), arg)
+	collectionTrains, err := testQueries.ListUserCollection(context.Background(), arg)
 	require.NoError(t, err)
 	require.Empty(t, collectionTrains)
 }
 
-func TestListUserCollectionTrains(t *testing.T) {
+func TestListUserCollection(t *testing.T) {
 	//create a single user and 10 random trains
 	testUser := createRandomUser(t)
 	for i := 0; i < 10; i++ {
@@ -107,13 +107,13 @@ func TestListUserCollectionTrains(t *testing.T) {
 		testQueries.CreateCollectionTrain(context.Background(), testCT)
 	}
 
-	arg := ListUserCollectionTrainsParams{
+	arg := ListUserCollectionParams{
 		UserID: testUser.ID,
 		Limit:  5,
 		Offset: 5,
 	}
 
-	collectionTrains, err := testQueries.ListUserCollectionTrains(context.Background(), arg)
+	collectionTrains, err := testQueries.ListUserCollection(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, collectionTrains, 5)
 

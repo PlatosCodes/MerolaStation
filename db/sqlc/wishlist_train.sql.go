@@ -49,21 +49,21 @@ func (q *Queries) DeleteWishlistTrain(ctx context.Context, arg DeleteWishlistTra
 	return err
 }
 
-const getUserWishlistTrains = `-- name: GetUserWishlistTrains :many
+const listUserWishlist = `-- name: ListUserWishlist :many
 SELECT id, user_id, train_id, created_at FROM wishlist_trains
 WHERE user_id = $1
 LIMIT $2
 OFFSET $3
 `
 
-type GetUserWishlistTrainsParams struct {
+type ListUserWishlistParams struct {
 	UserID int64 `json:"user_id"`
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) GetUserWishlistTrains(ctx context.Context, arg GetUserWishlistTrainsParams) ([]WishlistTrain, error) {
-	rows, err := q.db.QueryContext(ctx, getUserWishlistTrains, arg.UserID, arg.Limit, arg.Offset)
+func (q *Queries) ListUserWishlist(ctx context.Context, arg ListUserWishlistParams) ([]WishlistTrain, error) {
+	rows, err := q.db.QueryContext(ctx, listUserWishlist, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -90,20 +90,20 @@ func (q *Queries) GetUserWishlistTrains(ctx context.Context, arg GetUserWishlist
 	return items, nil
 }
 
-const listWishlistTrains = `-- name: ListWishlistTrains :many
+const listWishlists = `-- name: ListWishlists :many
 SELECT id, user_id, train_id, created_at FROM wishlist_trains
 ORDER BY user_id
 LIMIT $1
 OFFSET $2
 `
 
-type ListWishlistTrainsParams struct {
+type ListWishlistsParams struct {
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) ListWishlistTrains(ctx context.Context, arg ListWishlistTrainsParams) ([]WishlistTrain, error) {
-	rows, err := q.db.QueryContext(ctx, listWishlistTrains, arg.Limit, arg.Offset)
+func (q *Queries) ListWishlists(ctx context.Context, arg ListWishlistsParams) ([]WishlistTrain, error) {
+	rows, err := q.db.QueryContext(ctx, listWishlists, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

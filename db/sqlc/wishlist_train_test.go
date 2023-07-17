@@ -29,7 +29,7 @@ func TestDeleteWishlistTrain(t *testing.T) {
 	user, train := createRandomWishlistTrain(t)
 	page_id := int32(util.RandomInt(1, 100))
 	page_size := int32(util.RandomInt(1, 1000))
-	arg := GetUserWishlistTrainsParams{
+	arg := ListUserWishlistParams{
 		UserID: user.ID,
 		Limit:  page_id,
 		Offset: page_size,
@@ -40,21 +40,21 @@ func TestDeleteWishlistTrain(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	wishlistTrains, err := testQueries.GetUserWishlistTrains(context.Background(), arg)
+	wishlistTrains, err := testQueries.ListUserWishlist(context.Background(), arg)
 	require.NoError(t, err)
 	require.Empty(t, wishlistTrains)
 }
 
-func TestGetUserWishlistTrains(t *testing.T) {
+func TestListUserWishlist(t *testing.T) {
 	user, train := createRandomWishlistTrain(t)
 
-	arg := GetUserWishlistTrainsParams{
+	arg := ListUserWishlistParams{
 		UserID: user.ID,
 		Limit:  1,
 		Offset: 0,
 	}
 
-	wishlistTrains, err := testQueries.GetUserWishlistTrains(context.Background(), arg)
+	wishlistTrains, err := testQueries.ListUserWishlist(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, wishlistTrains, 1)
 
@@ -68,12 +68,12 @@ func TestListWishlistTrains(t *testing.T) {
 		createRandomWishlistTrain(t)
 	}
 
-	arg := ListWishlistTrainsParams{
+	arg := ListWishlistsParams{
 		Limit:  5,
 		Offset: 5,
 	}
 
-	wishlistTrains, err := testQueries.ListWishlistTrains(context.Background(), arg)
+	wishlistTrains, err := testQueries.ListWishlists(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, wishlistTrains, 5)
 

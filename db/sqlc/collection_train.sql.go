@@ -179,7 +179,7 @@ func (q *Queries) ListCollectionTrains(ctx context.Context, arg ListCollectionTr
 	return items, nil
 }
 
-const listUserCollectionTrains = `-- name: ListUserCollectionTrains :many
+const listUserCollection = `-- name: ListUserCollection :many
 SELECT id, user_id, train_id, created_at, times_traded FROM collection_trains
 WHERE user_id = $1
 ORDER BY id
@@ -187,14 +187,14 @@ LIMIT $2
 OFFSET $3
 `
 
-type ListUserCollectionTrainsParams struct {
+type ListUserCollectionParams struct {
 	UserID int64 `json:"user_id"`
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) ListUserCollectionTrains(ctx context.Context, arg ListUserCollectionTrainsParams) ([]CollectionTrain, error) {
-	rows, err := q.db.QueryContext(ctx, listUserCollectionTrains, arg.UserID, arg.Limit, arg.Offset)
+func (q *Queries) ListUserCollection(ctx context.Context, arg ListUserCollectionParams) ([]CollectionTrain, error) {
+	rows, err := q.db.QueryContext(ctx, listUserCollection, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

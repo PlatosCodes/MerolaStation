@@ -111,10 +111,9 @@ func TestListAllUserTradeOffers(t *testing.T) {
 
 	// Test function
 	arg := ListAllUserTradeOffersParams{
-		OfferedTrainOwner:   user1.ID,
-		RequestedTrainOwner: user2.ID,
-		Limit:               5,
-		Offset:              0,
+		OfferedTrainOwner: user1.ID,
+		Limit:             5,
+		Offset:            0,
 	}
 
 	offers, err := testQueries.ListAllUserTradeOffers(context.Background(), arg)
