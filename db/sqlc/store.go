@@ -90,6 +90,7 @@ func (store *SQLStore) RegisterTx(ctx context.Context, arg CreateUserParams) (Re
 }
 
 type TradeTxParams struct {
+	TradeOfferID   int64           `json:"trade_offer_id"`
 	OfferedTrain   CollectionTrain `json:"offered_train"`
 	RequestedTrain CollectionTrain `json:"requested_train"`
 }
@@ -174,6 +175,14 @@ func (store *SQLStore) TradeTx(ctx context.Context, arg TradeTxParams) (TradeTxR
 				return err
 			}
 
+		}
+
+		// Deletes Trade Offer after trade completion to avoid ability to trigger trade again if
+		//  one of OG owners adds the previously traded train back into their collection
+		// (buying or trading for a new one) and forgets to delete this old trade themselves
+		err = q.DeleteTradeOffer(ctx, arg.TradeOfferID)
+		if err != nil {
+			return err
 		}
 
 		return nil

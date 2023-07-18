@@ -419,6 +419,21 @@ func (mr *MockStoreMockRecorder) ListCollectionTrains(arg0, arg1 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCollectionTrains", reflect.TypeOf((*MockStore)(nil).ListCollectionTrains), arg0, arg1)
 }
 
+// ListTradeOffers mocks base method.
+func (m *MockStore) ListTradeOffers(arg0 context.Context, arg1 db.ListTradeOffersParams) (db.TradeOffer, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListTradeOffers", arg0, arg1)
+	ret0, _ := ret[0].(db.TradeOffer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListTradeOffers indicates an expected call of ListTradeOffers.
+func (mr *MockStoreMockRecorder) ListTradeOffers(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTradeOffers", reflect.TypeOf((*MockStore)(nil).ListTradeOffers), arg0, arg1)
+}
+
 // ListTradeTransactions mocks base method.
 func (m *MockStore) ListTradeTransactions(arg0 context.Context, arg1 db.ListTradeTransactionsParams) ([]db.TradeTransaction, error) {
 	m.ctrl.T.Helper()
@@ -432,21 +447,6 @@ func (m *MockStore) ListTradeTransactions(arg0 context.Context, arg1 db.ListTrad
 func (mr *MockStoreMockRecorder) ListTradeTransactions(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTradeTransactions", reflect.TypeOf((*MockStore)(nil).ListTradeTransactions), arg0, arg1)
-}
-
-// ListTrainTradeOffers mocks base method.
-func (m *MockStore) ListTrainTradeOffers(arg0 context.Context, arg1 db.ListTrainTradeOffersParams) (db.TradeOffer, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListTrainTradeOffers", arg0, arg1)
-	ret0, _ := ret[0].(db.TradeOffer)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListTrainTradeOffers indicates an expected call of ListTrainTradeOffers.
-func (mr *MockStoreMockRecorder) ListTrainTradeOffers(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTrainTradeOffers", reflect.TypeOf((*MockStore)(nil).ListTrainTradeOffers), arg0, arg1)
 }
 
 // ListTrainTradeTransactions mocks base method.

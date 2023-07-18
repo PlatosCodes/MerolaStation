@@ -24,18 +24,18 @@ func (server *Server) createTradeOffer(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	if req.OfferedTrainOwner != authPayload.UserID {
+		ctx.JSON(http.StatusUnauthorized, fmt.Errorf("you do not have permission to make this trade offer"))
+		return
+	}
+
 	arg := db.CreateTradeOfferParams{
 		OfferedTrain:        req.OfferedTrain,
 		OfferedTrainOwner:   req.OfferedTrainOwner,
 		RequestedTrain:      req.RequestedTrain,
 		RequestedTrainOwner: req.RequestedTrainOwner,
-	}
-
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-
-	if arg.OfferedTrainOwner != authPayload.UserID {
-		ctx.JSON(http.StatusUnauthorized, fmt.Errorf("you do not have permission to make this trade offer"))
-		return
 	}
 
 	tradeOffer, err := server.Store.CreateTradeOffer(ctx, arg)

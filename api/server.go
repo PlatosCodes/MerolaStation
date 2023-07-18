@@ -63,6 +63,9 @@ func (server *Server) setupRouter() {
 	authRoutes.GET("/users/trade_offers/all/:offered_train_owner", server.listAllUserTradeOffers)
 	authRoutes.DELETE("/users/trade_offer", server.deleteTradeOffer)
 
+	authRoutes.POST("/trade", server.createTrade)
+	authRoutes.GET("/trade/:id", server.getTradeTransaction)
+
 	authRoutes.GET("/collection_trains/trade_offers/:id", server.listCollectionTrainTradeOffers)
 
 	authRoutes.GET("/users/:id/wishlist", server.listUserWishlist)

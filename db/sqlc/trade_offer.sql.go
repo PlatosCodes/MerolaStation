@@ -145,7 +145,7 @@ func (q *Queries) ListCollectionTrainTradeOffers(ctx context.Context, arg ListCo
 	return i, err
 }
 
-const listTrainTradeOffers = `-- name: ListTrainTradeOffers :one
+const listTradeOffers = `-- name: ListTradeOffers :one
 SELECT id, offered_train, offered_train_owner, requested_train, requested_train_owner, created_at FROM trade_offers
 WHERE offered_train = $1 
 ORDER BY id
@@ -153,14 +153,14 @@ LIMIT $2
 OFFSET $3
 `
 
-type ListTrainTradeOffersParams struct {
+type ListTradeOffersParams struct {
 	OfferedTrain int64 `json:"offered_train"`
 	Limit        int32 `json:"limit"`
 	Offset       int32 `json:"offset"`
 }
 
-func (q *Queries) ListTrainTradeOffers(ctx context.Context, arg ListTrainTradeOffersParams) (TradeOffer, error) {
-	row := q.db.QueryRowContext(ctx, listTrainTradeOffers, arg.OfferedTrain, arg.Limit, arg.Offset)
+func (q *Queries) ListTradeOffers(ctx context.Context, arg ListTradeOffersParams) (TradeOffer, error) {
+	row := q.db.QueryRowContext(ctx, listTradeOffers, arg.OfferedTrain, arg.Limit, arg.Offset)
 	var i TradeOffer
 	err := row.Scan(
 		&i.ID,

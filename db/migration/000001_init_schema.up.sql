@@ -76,6 +76,10 @@ ALTER TABLE "collection_trains" ADD FOREIGN KEY ("user_id") REFERENCES "users" (
 
 ALTER TABLE "collection_trains" ADD FOREIGN KEY ("train_id") REFERENCES "trains" ("id");
 
+CREATE UNIQUE INDEX ON "collection_trains" ("user_id","train_id");
+
+CREATE UNIQUE INDEX ON "wishlist_trains" ("user_id","train_id");
+
 ALTER TABLE "wishlist_trains" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
 ALTER TABLE "wishlist_trains" ADD FOREIGN KEY ("train_id") REFERENCES "trains" ("id");

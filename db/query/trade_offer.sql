@@ -39,7 +39,7 @@ ORDER BY id
 LIMIT $2
 OFFSET $3;
 
--- name: ListTrainTradeOffers :one
+-- name: ListTradeOffers :one
 SELECT * FROM trade_offers
 WHERE offered_train = $1 
 ORDER BY id

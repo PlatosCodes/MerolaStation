@@ -618,3 +618,13 @@ func randomCollection(userID int64) []db.CollectionTrain {
 		TimesTraded: 1,
 	}}
 }
+
+func randomCollectionTrain(userID int64) db.CollectionTrain {
+	return db.CollectionTrain{
+		ID:          util.RandomInt(1, 1000),
+		UserID:      userID,
+		TrainID:     util.RandomInt(1, 1000),
+		CreatedAt:   time.Now(),
+		TimesTraded: 1,
+	}
+}

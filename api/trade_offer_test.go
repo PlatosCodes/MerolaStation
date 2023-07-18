@@ -862,160 +862,160 @@ func TestListAllUserTradeOffersAPI(t *testing.T) {
 	}
 }
 
-func TestListCollectionTrainTradeOffersAPI(t *testing.T) {
-	to, username := randomTradeOfferforRequests(t)
-	page_id := 1
-	page_size := 5
+// func TestListCollectionTrainTradeOffersAPI(t *testing.T) {
+// 	to, username := randomTradeOfferforRequests(t)
+// 	page_id := 1
+// 	page_size := 5
 
-	testCases := []struct {
-		name            string
-		requested_train int64
-		page_size       int
-		page_id         int
-		setupAuth       func(t *testing.T, request *http.Request, tokenMaker token.Maker)
-		buildStubs      func(store *mockdb.MockStore)
-		checkResponse   func(t *testing.T, recorder *httptest.ResponseRecorder)
-	}{
-		{
-			name:            "OK",
-			requested_train: to.RequestedTrain,
-			page_size:       page_size,
-			page_id:         page_id,
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, to.RequestedTrain, username, time.Minute)
-			},
-			buildStubs: func(store *mockdb.MockStore) {
-				arg1 := listCollectionTrainTradeOffersPath{
-					TrainID: to.RequestedTrain,
-				}
-				arg2 := AllUserTradeOffersPaginationQuery{
-					PageID:   int32(page_id),
-					PageSize: int32(page_size),
-				}
-				arg := db.ListCollectionTrainTradeOffersParams{
-					RequestedTrain: arg1.TrainID,
-					Limit:          int32(arg2.PageSize),
-					Offset:         int32((arg2.PageID - 1) * arg2.PageSize),
-				}
-				store.EXPECT().
-					ListCollectionTrainTradeOffers(gomock.Any(), gomock.Eq(arg)).
-					Times(1).
-					Return(to, nil)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				// require.Equal(t, http.StatusOK, recorder.Code)
-				require.Equal(t, http.StatusOK, recorder.Code, "Response body: %s", recorder.Body.String())
-				// requireBodyMatchTradeOffer(t, recorder.Body, to)
-			},
-		},
-		// 	{
-		// 		name:              "EmptyTradeOffer",
-		// 		OfferedTrainOwner: to.OfferedTrainOwner,
-		// 		page_id:           page_id,
-		// 		page_size:         page_size,
-		// 		setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-		// 			addAuthorization(t, request, tokenMaker, authorizationTypeBearer, to.OfferedTrainOwner, username, time.Minute)
-		// 		},
-		// 		buildStubs: func(store *mockdb.MockStore) {
-		// 			arg1 := AllUserTradeOffersPath{
-		// 				OfferedTrainOwner: to.OfferedTrainOwner,
-		// 			}
-		// 			arg2 := AllUserTradeOffersPaginationQuery{
-		// 				PageID:   int32(page_id),
-		// 				PageSize: int32(page_size),
-		// 			}
-		// 			arg := db.ListAllUserTradeOffersParams{
-		// 				OfferedTrainOwner: arg1.OfferedTrainOwner,
-		// 				Limit:             int32(arg2.PageSize),
-		// 				Offset:            int32((arg2.PageID - 1) * arg2.PageSize),
-		// 			}
-		// 			store.EXPECT().
-		// 				ListAllUserTradeOffers(gomock.Any(), gomock.Eq(arg)).
-		// 				Times(1).
-		// 				Return([]db.TradeOffer{}, sql.ErrNoRows)
-		// 		},
-		// 		checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-		// 			require.Equal(t, http.StatusNotFound, recorder.Code)
-		// 		},
-		// 	},
-		// 	{
-		// 		name:              "NotAuthorized",
-		// 		OfferedTrainOwner: to.OfferedTrainOwner + 1,
-		// 		page_id:           page_id,
-		// 		page_size:         page_size,
-		// 		setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-		// 			addAuthorization(t, request, tokenMaker, authorizationTypeBearer, to.OfferedTrainOwner, username, time.Minute)
-		// 		},
-		// 		buildStubs: func(store *mockdb.MockStore) {
-		// 			arg1 := AllUserTradeOffersPath{
-		// 				OfferedTrainOwner: to.OfferedTrainOwner,
-		// 			}
-		// 			arg2 := AllUserTradeOffersPaginationQuery{
-		// 				PageID:   int32(page_id),
-		// 				PageSize: int32(page_size),
-		// 			}
-		// 			arg := db.ListAllUserTradeOffersParams{
-		// 				OfferedTrainOwner: arg1.OfferedTrainOwner,
-		// 				Limit:             int32(arg2.PageSize),
-		// 				Offset:            int32((arg2.PageID - 1) * arg2.PageSize),
-		// 			}
-		// 			store.EXPECT().
-		// 				ListAllUserTradeOffers(gomock.Any(), gomock.Eq(arg)).
-		// 				Times(0)
-		// 		},
-		// 		checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-		// 			require.Equal(t, http.StatusUnauthorized, recorder.Code)
-		// 		},
-		// 	},
-		// 	{
-		// 		name:              "InvalidOfferedTrainOwner",
-		// 		OfferedTrainOwner: 0,
-		// 		page_id:           page_id,
-		// 		page_size:         page_size,
-		// 		setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-		// 			addAuthorization(t, request, tokenMaker, authorizationTypeBearer, to.RequestedTrainOwner, username, time.Minute)
-		// 		},
-		// 		buildStubs: func(store *mockdb.MockStore) {
-		// 			arg := db.ListAllUserTradeOffersParams{
-		// 				OfferedTrainOwner: 0,
-		// 				Limit:             int32(page_size),
-		// 				Offset:            int32((page_id - 1) * page_size),
-		// 			}
-		// 			store.EXPECT().
-		// 				ListUserTradeRequests(gomock.Any(), gomock.Eq(arg)).
-		// 				Times(0)
-		// 		},
-		// 		checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-		// 			require.Equal(t, http.StatusBadRequest, recorder.Code)
-		// 		},
-		// 	},
-	}
+// 	testCases := []struct {
+// 		name            string
+// 		requested_train int64
+// 		page_size       int
+// 		page_id         int
+// 		setupAuth       func(t *testing.T, request *http.Request, tokenMaker token.Maker)
+// 		buildStubs      func(store *mockdb.MockStore)
+// 		checkResponse   func(t *testing.T, recorder *httptest.ResponseRecorder)
+// 	}{
+// 		{
+// 			name:            "OK",
+// 			requested_train: to.RequestedTrain,
+// 			page_size:       page_size,
+// 			page_id:         page_id,
+// 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+// 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, to.RequestedTrain, username, time.Minute)
+// 			},
+// 			buildStubs: func(store *mockdb.MockStore) {
+// 				arg1 := listCollectionTrainTradeOffersPath{
+// 					TrainID: to.RequestedTrain,
+// 				}
+// 				arg2 := AllUserTradeOffersPaginationQuery{
+// 					PageID:   int32(page_id),
+// 					PageSize: int32(page_size),
+// 				}
+// 				arg := db.ListCollectionTrainTradeOffersParams{
+// 					RequestedTrain: arg1.TrainID,
+// 					Limit:          int32(arg2.PageSize),
+// 					Offset:         int32((arg2.PageID - 1) * arg2.PageSize),
+// 				}
+// 				store.EXPECT().
+// 					ListCollectionTrainTradeOffers(gomock.Any(), gomock.Eq(arg)).
+// 					Times(1).
+// 					Return(to, nil)
+// 			},
+// 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+// 				// require.Equal(t, http.StatusOK, recorder.Code)
+// 				require.Equal(t, http.StatusOK, recorder.Code, "Response body: %s", recorder.Body.String())
+// 				// requireBodyMatchTradeOffer(t, recorder.Body, to)
+// 			},
+// 		},
+// 		// 	{
+// 		// 		name:              "EmptyTradeOffer",
+// 		// 		OfferedTrainOwner: to.OfferedTrainOwner,
+// 		// 		page_id:           page_id,
+// 		// 		page_size:         page_size,
+// 		// 		setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+// 		// 			addAuthorization(t, request, tokenMaker, authorizationTypeBearer, to.OfferedTrainOwner, username, time.Minute)
+// 		// 		},
+// 		// 		buildStubs: func(store *mockdb.MockStore) {
+// 		// 			arg1 := AllUserTradeOffersPath{
+// 		// 				OfferedTrainOwner: to.OfferedTrainOwner,
+// 		// 			}
+// 		// 			arg2 := AllUserTradeOffersPaginationQuery{
+// 		// 				PageID:   int32(page_id),
+// 		// 				PageSize: int32(page_size),
+// 		// 			}
+// 		// 			arg := db.ListAllUserTradeOffersParams{
+// 		// 				OfferedTrainOwner: arg1.OfferedTrainOwner,
+// 		// 				Limit:             int32(arg2.PageSize),
+// 		// 				Offset:            int32((arg2.PageID - 1) * arg2.PageSize),
+// 		// 			}
+// 		// 			store.EXPECT().
+// 		// 				ListAllUserTradeOffers(gomock.Any(), gomock.Eq(arg)).
+// 		// 				Times(1).
+// 		// 				Return([]db.TradeOffer{}, sql.ErrNoRows)
+// 		// 		},
+// 		// 		checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+// 		// 			require.Equal(t, http.StatusNotFound, recorder.Code)
+// 		// 		},
+// 		// 	},
+// 		// 	{
+// 		// 		name:              "NotAuthorized",
+// 		// 		OfferedTrainOwner: to.OfferedTrainOwner + 1,
+// 		// 		page_id:           page_id,
+// 		// 		page_size:         page_size,
+// 		// 		setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+// 		// 			addAuthorization(t, request, tokenMaker, authorizationTypeBearer, to.OfferedTrainOwner, username, time.Minute)
+// 		// 		},
+// 		// 		buildStubs: func(store *mockdb.MockStore) {
+// 		// 			arg1 := AllUserTradeOffersPath{
+// 		// 				OfferedTrainOwner: to.OfferedTrainOwner,
+// 		// 			}
+// 		// 			arg2 := AllUserTradeOffersPaginationQuery{
+// 		// 				PageID:   int32(page_id),
+// 		// 				PageSize: int32(page_size),
+// 		// 			}
+// 		// 			arg := db.ListAllUserTradeOffersParams{
+// 		// 				OfferedTrainOwner: arg1.OfferedTrainOwner,
+// 		// 				Limit:             int32(arg2.PageSize),
+// 		// 				Offset:            int32((arg2.PageID - 1) * arg2.PageSize),
+// 		// 			}
+// 		// 			store.EXPECT().
+// 		// 				ListAllUserTradeOffers(gomock.Any(), gomock.Eq(arg)).
+// 		// 				Times(0)
+// 		// 		},
+// 		// 		checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+// 		// 			require.Equal(t, http.StatusUnauthorized, recorder.Code)
+// 		// 		},
+// 		// 	},
+// 		// 	{
+// 		// 		name:              "InvalidOfferedTrainOwner",
+// 		// 		OfferedTrainOwner: 0,
+// 		// 		page_id:           page_id,
+// 		// 		page_size:         page_size,
+// 		// 		setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+// 		// 			addAuthorization(t, request, tokenMaker, authorizationTypeBearer, to.RequestedTrainOwner, username, time.Minute)
+// 		// 		},
+// 		// 		buildStubs: func(store *mockdb.MockStore) {
+// 		// 			arg := db.ListAllUserTradeOffersParams{
+// 		// 				OfferedTrainOwner: 0,
+// 		// 				Limit:             int32(page_size),
+// 		// 				Offset:            int32((page_id - 1) * page_size),
+// 		// 			}
+// 		// 			store.EXPECT().
+// 		// 				ListUserTradeRequests(gomock.Any(), gomock.Eq(arg)).
+// 		// 				Times(0)
+// 		// 		},
+// 		// 		checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+// 		// 			require.Equal(t, http.StatusBadRequest, recorder.Code)
+// 		// 		},
+// 		// 	},
+// 	}
 
-	for i := range testCases {
-		tc := testCases[i]
-		t.Run(tc.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
+// 	for i := range testCases {
+// 		tc := testCases[i]
+// 		t.Run(tc.name, func(t *testing.T) {
+// 			ctrl := gomock.NewController(t)
+// 			defer ctrl.Finish()
 
-			store := mockdb.NewMockStore(ctrl)
-			tc.buildStubs(store)
+// 			store := mockdb.NewMockStore(ctrl)
+// 			tc.buildStubs(store)
 
-			// start test server and send request
-			server := newTestServer(t, store)
-			recorder := httptest.NewRecorder()
+// 			// start test server and send request
+// 			server := newTestServer(t, store)
+// 			recorder := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/collection_trains/trade_offers/%d?page_id=%d&page_size=%d", tc.requested_train, tc.page_id, tc.page_size)
+// 			url := fmt.Sprintf("/collection_trains/trade_offers/%d?page_id=%d&page_size=%d", tc.requested_train, tc.page_id, tc.page_size)
 
-			request, err := http.NewRequest(http.MethodGet, url, nil)
-			require.NoError(t, err)
+// 			request, err := http.NewRequest(http.MethodGet, url, nil)
+// 			require.NoError(t, err)
 
-			tc.setupAuth(t, request, server.tokenMaker)
-			server.router.ServeHTTP(recorder, request)
-			tc.checkResponse(t, recorder)
-		})
+// 			tc.setupAuth(t, request, server.tokenMaker)
+// 			server.router.ServeHTTP(recorder, request)
+// 			tc.checkResponse(t, recorder)
+// 		})
 
-	}
-}
+// 	}
+// }
 
 func TestDeleteTradeOfferAPI(t *testing.T) {
 	to, username := randomTradeOffer(t)

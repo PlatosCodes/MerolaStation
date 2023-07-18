@@ -13,8 +13,14 @@ citext:
 migrateup:
 	migrate -path db/migration -database "postgresql://root:bluecomet@localhost:5432/merola_station?sslmode=disable" -verbose up
 
+migrateup1:
+	migrate -path db/migration -database "postgresql://root:bluecomet@localhost:5432/merola_station?sslmode=disable" -verbose up 1
+
 migratedown: 
 	migrate -path db/migration -database "postgresql://root:bluecomet@localhost:5432/merola_station?sslmode=disable" -verbose down
+
+migratedown1: 
+	migrate -path db/migration -database "postgresql://root:bluecomet@localhost:5432/merola_station?sslmode=disable" -verbose down 1
 
 sqlc:
 	sqlc generate
@@ -28,4 +34,4 @@ server:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/PlatosCodes/MerolaStation/db/sqlc Store
 	
-.PHONY: postgres createdb dropdb citext migrateup migratedown sqlc test server mock
+.PHONY: postgres createdb dropdb citext migrateup migrateup1 migratedown migratedown1 sqlc test server mock
