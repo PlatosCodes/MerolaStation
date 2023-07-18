@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS citext;
+
 CREATE TABLE "users" (
   "id" bigserial PRIMARY KEY,
   "username" varchar NOT NULL,

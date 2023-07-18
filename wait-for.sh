@@ -109,7 +109,7 @@ wait_for() {
 while :; do
   case "$1" in
     http://*|https://*)
-    HOST="$1"
+    HOST="postgres"
     PROTOCOL="http"
     shift 1
     ;;

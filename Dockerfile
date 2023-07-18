@@ -15,6 +15,7 @@ COPY app.env .
 COPY train_data.csv ./train_data.csv
 COPY start.sh .
 COPY wait-for.sh .
+COPY init_citext.sql ./init_citext.sql
 COPY db/migration ./migration
 
 EXPOSE 8080
