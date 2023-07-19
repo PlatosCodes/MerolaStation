@@ -26,7 +26,7 @@ jobs:
 
         - name: Update kubeconfig
           run: |
-            aws eks --region us-east-2 update-kubeconfig --name merola-station --profile github
+            aws eks --region us-east-2 update-kubeconfig --name merola-station
             
         - name: Login to Amazon ECR
           id: login-ecr
