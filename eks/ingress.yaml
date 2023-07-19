@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: nginx
+spec:
+  controller: k8s.io/ingress-nginx
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: merola-station-ingress
+  # annotations:
+  #   cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: "a2f008e248d034530ad48b6f510b4339-1194675631.us-east-2.elb.amazonaws.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service: 
+            name: merola-station-api-service
+            port:
+              number: 80
+  # tls:
+  # - hosts:
+  #   - a2f008e248d034530ad48b6f510b4339-1194675631.us-east-2.elb.amazonaws.com
+  #   secretName: merola-station-api-cert

@@ -96,6 +96,11 @@ func (server *Server) getUser(ctx *gin.Context) {
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
+	if req.ID != authPayload.UserID {
+		ctx.JSON(http.StatusUnauthorized, fmt.Errorf("you do not have permission to view this collection"))
+		return
+	}
+
 	user, err := server.Store.GetUser(ctx, authPayload.UserID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -103,11 +108,6 @@ func (server *Server) getUser(ctx *gin.Context) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-
-	if user.ID != authPayload.UserID {
-		ctx.JSON(http.StatusUnauthorized, fmt.Errorf("you do not have permission to view this collection"))
 		return
 	}
 
