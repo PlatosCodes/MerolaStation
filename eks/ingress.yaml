@@ -1,24 +1,24 @@
-# apiVersion: networking.k8s.io/v1
-# kind: IngressClass
-# metadata:
-#   name: nginx
-# spec:
-#   controller: k8s.io/ingress-nginx
-# ---
-# apiVersion: networking.k8s.io/v1
-# kind: Ingress
-# metadata:
-#   name: merola-station-ingress
-# spec:
-#   ingressClassName: nginx
-#   rules:
-#   - host: "a2f008e248d034530ad48b6f510b4339-1194675631.us-east-2.elb.amazonaws.com"
-#     http:
-#       paths:
-#       - pathType: Prefix
-#         path: "/"
-#         backend:
-#           service: 
-#             name: merola-station-api-service
-#             port:
-#               number: 80
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: nginx
+spec:
+  controller: k8s.io/ingress-nginx
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: merola-station-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: "a2f008e248d034530ad48b6f510b4339-1194675631.us-east-2.elb.amazonaws.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service: 
+            name: merola-station-api-service
+            port:
+              number: 80
