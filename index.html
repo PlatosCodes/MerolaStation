@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Merola Station</title>
+  <style>
+    /* CSS styling */
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .jumbotron {
+      background-color: #f8f9fa;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .login-container {
+      max-width: 400px;
+      margin: 20px auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+    }
+
+    .form-group input[type="submit"] {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .form-group input[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    .signup-link {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .signup-link a {
+      color: #007bff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="jumbotron">
+    <h1>Welcome to Merola Station</h1>
+  </div>
+
+  <div class="login-container">
+    <form>
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required minlength="6">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required minlength="6">
+      </div>
+
+      <div class="form-group">
+        <input type="submit" value="Log In">
+      </div>
+    </form>
+
+    <div class="signup-link">
+      <a href="signup.html">Don't have an account? Sign up here.</a>
+    </div>
+  </div>
+</body>
+</html>
