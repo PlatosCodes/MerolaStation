@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: merola-station-api
-        image: 620495856348.dkr.ecr.us-east-2.amazonaws.com/merolastation:065906552904510bab5385faaae6c4c163df2e3a
+        image: 620495856348.dkr.ecr.us-east-2.amazonaws.com/merolastation:latest
         ports:
         - containerPort: 8080
