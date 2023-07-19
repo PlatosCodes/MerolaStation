@@ -41,7 +41,7 @@ jobs:
             docker push -a $REGISTRY/$REPOSITORY
 
         - name: Update kube config
-          run: aws eks update-kubeconfig --region us-east-2 --name merola-station
+          run: aws eks --region us-east-2 update-kubeconfig --name merola-station --profile github
         
         - name: Deploy image to Amazon EKS #Add issuer.yaml in future
           run: |
