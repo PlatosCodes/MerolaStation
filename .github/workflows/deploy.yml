@@ -40,9 +40,6 @@ jobs:
             docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:latest .
             docker push -a $REGISTRY/$REPOSITORY
 
-        - name: Update kube config
-          run: aws eks --region us-east-2 update-kubeconfig --name merola-station --profile github
-        
         - name: Deploy image to Amazon EKS #Add issuer.yaml in future
           run: |
             kubectl apply -f eks/aws-auth.yaml
