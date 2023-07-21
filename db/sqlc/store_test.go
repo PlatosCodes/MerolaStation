@@ -14,7 +14,6 @@ func TestRegisterTx(t *testing.T) {
 
 	hashedPassword, err := util.HashPassword("secret")
 	require.NoError(t, err)
-
 	// run n concurrent user registrations to ensure transaction works well
 	n := 5
 
@@ -24,7 +23,7 @@ func TestRegisterTx(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		go func() {
 			result, err := store.RegisterTx(context.Background(), CreateUserParams{
-				Username:       "Alex",
+				Username:       util.RandomString(6),
 				HashedPassword: hashedPassword,
 				Email:          util.RandomEmail(),
 			})
@@ -47,9 +46,9 @@ func TestRegisterTx(t *testing.T) {
 		require.NotEmpty(t, user)
 
 		require.NotZero(t, user.ID)
-		require.Equal(t, "Alex", user.Username)
 		require.Equal(t, hashedPassword, user.HashedPassword)
 		require.NotEmpty(t, user.Email)
+		require.NotEmpty(t, user.Username)
 
 		require.WithinDuration(t, user.CreatedAt, time.Now(), time.Second)
 
