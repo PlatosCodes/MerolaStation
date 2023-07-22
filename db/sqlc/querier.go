@@ -6,10 +6,13 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Querier interface {
 	CreateCollectionTrain(ctx context.Context, arg CreateCollectionTrainParams) (CollectionTrain, error)
+	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateTradeOffer(ctx context.Context, arg CreateTradeOfferParams) (TradeOffer, error)
 	CreateTradeTransaction(ctx context.Context, arg CreateTradeTransactionParams) (TradeTransaction, error)
 	CreateTrain(ctx context.Context, arg CreateTrainParams) (Train, error)
@@ -25,6 +28,7 @@ type Querier interface {
 	GetCollectionTrainByID(ctx context.Context, id int64) (CollectionTrain, error)
 	GetCollectionTrainforUpdate(ctx context.Context, arg GetCollectionTrainforUpdateParams) (CollectionTrain, error)
 	GetCollectionTrainforUpdateByID(ctx context.Context, id int64) (CollectionTrain, error)
+	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	GetTradeOfferByTradeID(ctx context.Context, id int64) (TradeOffer, error)
 	GetTradeTransaction(ctx context.Context, id int64) (TradeTransaction, error)
 	GetTrain(ctx context.Context, id int64) (Train, error)

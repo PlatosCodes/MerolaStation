@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS citext;
 
 CREATE TABLE "users" (
   "id" bigserial PRIMARY KEY,
-  "username" varchar NOT NULL,
+  "username" varchar UNIQUE NOT NULL,
   "email" CITEXT UNIQUE NOT NULL,
   "hashed_password" bytea NOT NULL,
   "activated" BOOLEAN NOT NULL DEFAULT false,

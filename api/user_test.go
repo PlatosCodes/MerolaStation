@@ -452,7 +452,6 @@ func TestListUserAPI(t *testing.T) {
 	}
 }
 
-// I am here. Use the loginUser fn on the left to drive the tests
 func TestLoginUserAPI(t *testing.T) {
 	user, password := randomUser(t)
 
@@ -477,6 +476,9 @@ func TestLoginUserAPI(t *testing.T) {
 					GetUserByUsername(gomock.Any(), gomock.Eq(arg.Username)).
 					Times(1).
 					Return(user, nil)
+				store.EXPECT().
+					CreateSession(gomock.Any(), gomock.Any()).
+					Times(1)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -493,6 +495,9 @@ func TestLoginUserAPI(t *testing.T) {
 					GetUserByUsername(gomock.Any(), gomock.Any()).
 					Times(1).
 					Return(db.User{}, sql.ErrConnDone)
+				store.EXPECT().
+					CreateSession(gomock.Any(), gomock.Any()).
+					Times(1)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)

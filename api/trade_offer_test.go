@@ -23,7 +23,6 @@ import (
 func TestCreateTradeOffer(t *testing.T) {
 	user1, _ := randomUser(t)
 	ct1 := randomCollection(user1.ID)
-	fmt.Print(ct1[0])
 
 	user2, _ := randomUser(t)
 	ct2 := randomCollection(user2.ID)
