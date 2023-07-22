@@ -1,0 +1,99 @@
+Project merola_station {
+  database_type: 'PostgreSQL'
+  Note: '''
+    # Merola Station Database
+  '''
+}
+
+Table users {
+  id bigserial [primary key]
+  username varchar [not null]
+  email CITEXT [unique, not null]
+  hashed_password bytea [not null]
+  activated BOOLEAN [not null]
+  password_last_changed_at timestamptz [not null, default: `0001-01-01 00:00:00`]
+  version bigint [not null, default: 1]
+  created_at timestamptz [not null, default: `now()`]
+}
+
+Table trains {
+  id bigserial [primary key]
+  model_number varchar [not null]
+  name varchar [not null]
+  value bigint [not null, default: 0]
+  created_at timestamptz [not null, default: `now()`]
+  version bigint [not null, default: 1]
+  last_edited_at timestamptz [not null, default: `now()`]
+
+  Indexes {
+    model_number
+    name
+  }
+}
+
+Table collection_trains {
+  id bigserial [primary key]
+  user_id bigint [ref: > users.id, not null]
+  train_id bigint [ref: > trains.id, not null]
+  created_at timestamptz [not null, default: `now()`]
+
+    Indexes {
+    user_id
+  }
+}
+
+Table wishlist_trains {
+  id bigserial [primary key]
+  user_id bigint [ref: > users.id, not null]
+  train_id bigint [ref: > trains.id, not null]
+  created_at timestamptz [not null, default: `now()`]
+
+    Indexes {
+    user_id
+  }
+}
+
+Table trade_offers {
+  id bigserial [primary key]
+  offered_train bigint [ref: > trains.id, not null]
+  offered_train_owner bigint [ref: > users.id, not null]
+  requested_train bigint [ref: > trains.id, not null]
+  requested_train_owner bigint [ref: > users.id, not null]
+  created_at timestamptz [not null, default: `now()`]
+
+    Indexes {
+      offered_train_owner
+      requested_train_owner
+  }
+}
+
+Table trade_entry {
+  id bigserial [primary key]
+  offered_train bigint [ref: > trains.id, not null]
+  offered_train_owner bigint [ref: > users.id, not null]
+  requested_train bigint [ref: > trains.id, not null]
+  requested_train_owner bigint [ref: > users.id, not null]
+  created_at timestamptz [not null, default: `now()`]
+  
+    Indexes {
+      offered_train_owner
+      requested_train
+      offered_train
+      requested_train_owner
+  }
+}
+
+Table sessions {
+  id uuid [primary key]
+  username varchar [ref: > users.username, unique, not null]
+  refresh_token varchar [not null]
+  user_agent varchar [not null]
+  client_ip varchar [not null]
+  is_blocked bool [not null]
+  expires_at timestamptz [not null]
+  created_at timestamptz [not null, default: `now()`]
+
+    Indexes {
+      id
+    }
+}
