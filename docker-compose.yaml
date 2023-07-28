@@ -4,7 +4,9 @@ services:
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=bluecomet
-      - POSTGRES_DB=merola_station
+      - POSTGRES_DB=merolastation
+    ports:
+      - "5432:5432" #Only for local development, remove this line when deploying to AWS
 
   api:
     build:
@@ -13,7 +15,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_SOURCE=postgresql://root:bluecomet@postgres:5432/merola_station?sslmode=disable
+      - DB_SOURCE=postgresql://root:bluecomet@postgres:5432/merolastation?sslmode=disable
     depends_on:
       - postgres
     entrypoint: [ "/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]

@@ -10,6 +10,9 @@ import (
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
 	"github.com/PlatosCodes/MerolaStation/util"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func main() {
@@ -22,6 +25,9 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
+
+	// run db migrations
+	runDBMigration(config.MigrationURL, config.DBSource)
 
 	store := db.NewStore(conn)
 	server, err := api.NewServer(config, store)
@@ -37,6 +43,17 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot start server:", err)
 	}
+}
+
+func runDBMigration(migrationURL string, dbSource string) {
+	migration, err := migrate.New(migrationURL, dbSource)
+	if err != nil {
+		log.Fatal("cannot create new migrate instance:", err)
+	}
+	if err = migration.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatal("failed to run migrate up:", err)
+	}
+	log.Println("db migrated successfully")
 }
 
 func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
