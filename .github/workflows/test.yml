@@ -14,11 +14,11 @@ jobs:
 
     services:
         postgres:
-          image: postgres:15
+          image: postgres:15-alpine
           env:
             POSTGRES_USER: root
             POSTGRES_PASSWORD: bluecomet
-            POSTGRES_DB: merola_station
+            POSTGRES_DB: merolastation
           ports:
             - 5432:5432
           options: >-
@@ -41,12 +41,9 @@ jobs:
         sudo mv migrate /usr/bin/migrate
         which migrate
 
-    - name: Add citext extension to Postgres
-      run: |
-        PGPASSWORD=bluecomet psql -h localhost -U root -d merola_station -c "CREATE EXTENSION IF NOT EXISTS citext;"
-
     - name: Run migrations
       run: make migrateup
   
+
     - name: Test
       run: make test
