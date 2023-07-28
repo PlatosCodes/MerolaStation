@@ -1,4 +1,5 @@
 DB_URL=postgresql://root:bluecomet@localhost:5432/merolastation?sslmode=disable
+
 network:
 	docker network create merolastation-network
 postgres:
