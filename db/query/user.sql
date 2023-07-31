@@ -23,3 +23,14 @@ OFFSET $2;
 
 -- name: DeleteUser :exec
 DELETE from users WHERE id = $1;
+
+-- name: UpdateUser :one
+UPDATE users
+SET
+  email = COALESCE(sqlc.narg(email), email),
+  hashed_password = COALESCE(sqlc.narg(hashed_password), hashed_password),
+  password_changed_at = COALESCE(sqlc.narg(password_changed_at), password_changed_at),
+  activated = COALESCE(sqlc.narg(activated), activated)
+WHERE
+  username = sqlc.arg(username)
+RETURNING *;

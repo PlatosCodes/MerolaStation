@@ -8,7 +8,7 @@ CREATE TABLE "users" (
   "email" CITEXT UNIQUE NOT NULL,
   "hashed_password" bytea NOT NULL,
   "activated" BOOLEAN NOT NULL,
-  "password_last_changed_at" timestamptz NOT NULL DEFAULT (0001-01-01 00:00:00),
+  "password_changed_at" timestamptz NOT NULL DEFAULT (0001-01-01 00:00:00),
   "version" bigint NOT NULL DEFAULT 1,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
