@@ -51,6 +51,7 @@ type Querier interface {
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	ListWishlists(ctx context.Context, arg ListWishlistsParams) ([]WishlistTrain, error)
 	UpdateCollectionTrain(ctx context.Context, arg UpdateCollectionTrainParams) (CollectionTrain, error)
+	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) (User, error)
 	UpdateTrainValue(ctx context.Context, arg UpdateTrainValueParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }

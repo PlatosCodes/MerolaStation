@@ -114,6 +114,27 @@ func TestUpdateUserOnlyEmail(t *testing.T) {
 	require.Equal(t, user.ID, updatedUser.ID)
 	require.Equal(t, user.Username, updatedUser.Username)
 	require.NotEqual(t, user.Email, updatedUser.Email)
+	require.Equal(t, user.FirstName, updatedUser.FirstName)
+	require.Equal(t, user.HashedPassword, updatedUser.HashedPassword)
+}
+
+func TestUpdateUserOnlyName(t *testing.T) {
+	user := createRandomUser(t)
+
+	newName := util.RandomString(6)
+	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+		Username: user.Username,
+		FirstName: sql.NullString{
+			String: newName,
+			Valid:  true,
+		},
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, user.ID, updatedUser.ID)
+	require.Equal(t, user.Username, updatedUser.Username)
+	require.Equal(t, user.Email, updatedUser.Email)
+	require.NotEqual(t, user.FirstName, updatedUser.FirstName)
 	require.Equal(t, user.HashedPassword, updatedUser.HashedPassword)
 }
 
@@ -124,9 +145,10 @@ func TestUpdateUserOnlyPassword(t *testing.T) {
 	newHashedPassword, err := util.HashPassword(newPassword)
 	require.NoError(t, err)
 
-	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
-		Username:       user.Username,
-		HashedPassword: newHashedPassword,
+	updatedUser, err := testQueries.UpdatePassword(context.Background(), UpdatePasswordParams{
+		Username:          user.Username,
+		HashedPassword:    newHashedPassword,
+		PasswordChangedAt: time.Now(),
 	})
 
 	require.NoError(t, err)
@@ -142,29 +164,25 @@ func TestUpdateUserAllFields(t *testing.T) {
 	user := createRandomUser(t)
 
 	newEmail := util.RandomEmail()
-
-	newPassword := util.RandomString(6)
-	newHashedPassword, err := util.HashPassword(newPassword)
-	require.NoError(t, err)
+	newName := util.RandomString(6)
 
 	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
-		Username:       user.Username,
-		HashedPassword: newHashedPassword,
+		Username: user.Username,
 		Email: sql.NullString{
 			String: newEmail,
+			Valid:  true,
+		},
+		FirstName: sql.NullString{
+			String: newName,
 			Valid:  true,
 		},
 	})
 
 	require.NoError(t, err)
-
 	require.Equal(t, user.ID, updatedUser.ID)
 	require.Equal(t, user.Username, updatedUser.Username)
-
 	require.NotEqual(t, user.Email, updatedUser.Email)
+	require.NotEqual(t, user.FirstName, updatedUser.FirstName)
 	require.Equal(t, newEmail, updatedUser.Email)
-
-	require.NotEqual(t, user.HashedPassword, updatedUser.HashedPassword)
-	require.Equal(t, newHashedPassword, updatedUser.HashedPassword)
-
+	require.Equal(t, user.HashedPassword, updatedUser.HashedPassword)
 }

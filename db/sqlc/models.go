@@ -61,6 +61,7 @@ type User struct {
 	ID                int64     `json:"id"`
 	Username          string    `json:"username"`
 	Email             string    `json:"email"`
+	FirstName         string    `json:"first_name"`
 	HashedPassword    []byte    `json:"hashed_password"`
 	Activated         bool      `json:"activated"`
 	PasswordChangedAt time.Time `json:"password_changed_at"`

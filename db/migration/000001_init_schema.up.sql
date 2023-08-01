@@ -4,6 +4,7 @@ CREATE TABLE "users" (
   "id" bigserial PRIMARY KEY,
   "username" varchar UNIQUE NOT NULL,
   "email" CITEXT UNIQUE NOT NULL,
+  "first_name" varchar NOT NULL,
   "hashed_password" bytea NOT NULL,
   "activated" BOOLEAN NOT NULL DEFAULT false,
   "password_changed_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00',
