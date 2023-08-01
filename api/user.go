@@ -21,20 +21,20 @@ type createUserRequest struct {
 }
 
 type userResponse struct {
-	UserID                int64     `json:"id"`
-	Username              string    `json:"username"`
-	CreatedAt             time.Time `json:"created_at"`
-	Email                 string    `json:"email"`
-	PasswordLastChangedAt time.Time `json:"password_changed_at"`
+	UserID            int64     `json:"id"`
+	Username          string    `json:"username"`
+	CreatedAt         time.Time `json:"created_at"`
+	Email             string    `json:"email"`
+	PasswordChangedAt time.Time `json:"password_changed_at"`
 }
 
 func newUserResponse(user db.User) userResponse {
 	return userResponse{
-		UserID:                user.ID,
-		Username:              user.Username,
-		CreatedAt:             user.CreatedAt,
-		Email:                 user.Email,
-		PasswordLastChangedAt: user.PasswordLastChangedAt,
+		UserID:            user.ID,
+		Username:          user.Username,
+		CreatedAt:         user.CreatedAt,
+		Email:             user.Email,
+		PasswordChangedAt: user.PasswordChangedAt,
 	}
 }
 
@@ -81,11 +81,11 @@ type getUserRequest struct {
 }
 
 type getUserResponse struct {
-	ID                    int64
-	CreatedAt             time.Time
-	Username              string
-	Email                 string
-	PasswordLastChangedAt time.Time
+	ID                int64
+	CreatedAt         time.Time
+	Username          string
+	Email             string
+	PasswordChangedAt time.Time
 }
 
 func (server *Server) getUser(ctx *gin.Context) {
@@ -113,11 +113,11 @@ func (server *Server) getUser(ctx *gin.Context) {
 	}
 
 	rsp := getUserResponse{
-		ID:                    user.ID,
-		CreatedAt:             user.CreatedAt,
-		Username:              user.Username,
-		Email:                 user.Email,
-		PasswordLastChangedAt: user.PasswordLastChangedAt,
+		ID:                user.ID,
+		CreatedAt:         user.CreatedAt,
+		Username:          user.Username,
+		Email:             user.Email,
+		PasswordChangedAt: user.PasswordChangedAt,
 	}
 
 	ctx.JSON(http.StatusOK, rsp)

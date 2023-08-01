@@ -7,6 +7,8 @@ services:
       - POSTGRES_DB=merolastation
     ports:
       - "5432:5432" #Only for local development, remove this line when deploying to AWS
+    networks:
+      - merolastation-network
 
   api:
     build:
@@ -18,5 +20,10 @@ services:
       - DB_SOURCE=postgresql://root:bluecomet@postgres:5432/merolastation?sslmode=disable
     depends_on:
       - postgres
+    networks:
+      - merolastation-network
     entrypoint: [ "/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]
     command: [ "/app/main" ]
+    
+networks:
+  merolastation-network:

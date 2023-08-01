@@ -2,9 +2,9 @@
 INSERT INTO users (
   username,
   hashed_password,
-  email
+  email, first_name
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4
 ) RETURNING *;
 
 -- name: GetUser :one
@@ -23,3 +23,21 @@ OFFSET $2;
 
 -- name: DeleteUser :exec
 DELETE from users WHERE id = $1;
+
+-- name: UpdateUser :one
+UPDATE users
+SET
+  email = COALESCE(sqlc.narg(email), email),
+  first_name = COALESCE(sqlc.narg(first_name), first_name)
+WHERE
+  username = sqlc.arg(username)
+RETURNING *;
+
+-- name: UpdatePassword :one
+UPDATE users
+SET
+  hashed_password = $1,
+  password_changed_at = $2
+WHERE
+  username = sqlc.arg(username)
+RETURNING *;
