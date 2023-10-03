@@ -93,7 +93,7 @@ func (server *Server) getTrainByModel(ctx *gin.Context) {
 
 type listTrainRequest struct {
 	PageID   int32 `form:"page_id" binding:"required,min=1"`
-	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
+	PageSize int32 `form:"page_size" binding:"required,min=5,max=25"`
 }
 
 func (server *Server) listTrain(ctx *gin.Context) {

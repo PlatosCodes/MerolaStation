@@ -173,20 +173,27 @@ type loginUserRequest struct {
 }
 
 type loginUserResponse struct {
-	SessionID             uuid.UUID    `json:"session_id"`
-	AccessToken           string       `json:"access_token"`
-	AccessTokenExpiresAt  time.Time    `json:"access_token_expires_at"`
-	RefreskToken          string       `json:"refresh_token"`
-	RefreshTokenExpiresAt time.Time    `json:"refresh_token_expires_at"`
-	User                  userResponse `json:"user"`
+	SessionID uuid.UUID `json:"session_id"`
+	// AccessToken           string       `json:"access_token"`
+	// AccessTokenExpiresAt  time.Time    `json:"access_token_expires_at"`
+	// RefreshToken          string       `json:"refresh_token"`
+	// RefreshTokenExpiresAt time.Time    `json:"refresh_token_expires_at"`
+	User userResponse `json:"user"`
 }
 
 func (server *Server) loginUser(ctx *gin.Context) {
 	var req loginUserRequest
+	fmt.Println(req)
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	// Use this if want to send a more generic message in response:
+	// if err := ctx.ShouldBindJSON(&req); err != nil {
+	// 	log.Printf("Error binding login request: %v", err) // Log the detailed error
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error. Please try again later."})
+	// 	return
+	// }
 
 	user, err := server.Store.GetUserByUsername(ctx, req.Username)
 	if err != nil {
@@ -200,6 +207,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	err = util.CheckPassword(req.Password, user.HashedPassword)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
 	}
 
 	accessToken, accessPayload, err := server.tokenMaker.CreateToken(
@@ -237,13 +245,31 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	}
 
 	rsp := loginUserResponse{
-		SessionID:             session.ID,
-		AccessToken:           accessToken,
-		AccessTokenExpiresAt:  accessPayload.ExpiresAt.Time,
-		RefreskToken:          refreshToken,
-		RefreshTokenExpiresAt: refreshPayload.ExpiresAt.Time,
-		User:                  newUserResponse(user),
+		SessionID: session.ID,
+		// AccessToken:           accessToken,
+		// AccessTokenExpiresAt:  accessPayload.ExpiresAt.Time,
+		// RefreshToken:          refreshToken,
+		// RefreshTokenExpiresAt: refreshPayload.ExpiresAt.Time,
+		User: newUserResponse(user),
 	}
+
+	// Set the access token as an HttpOnly cookie
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     "access_token",
+		Value:    accessToken,
+		Expires:  accessPayload.ExpiresAt.Time,
+		HttpOnly: true,
+		Path:     "/",
+	})
+
+	// Set the refresh token as an HttpOnly cookie
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Expires:  refreshPayload.ExpiresAt.Time,
+		HttpOnly: true,
+		Path:     "/",
+	})
 
 	ctx.JSON(http.StatusOK, rsp)
 

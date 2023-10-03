@@ -120,7 +120,7 @@ func (server *Server) deleteCollectionTrain(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-
+	fmt.Println(req.ID, authPayload.UserID)
 	if req.ID != authPayload.UserID {
 		ctx.JSON(http.StatusUnauthorized, fmt.Errorf("you do not have permission to add to this collection"))
 		return
