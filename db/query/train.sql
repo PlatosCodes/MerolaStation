@@ -30,3 +30,12 @@ WHERE id = $1;
 
 -- name: DeleteTrain :exec
 DELETE from trains WHERE id = $1;
+
+-- name: SearchTrainsByModelNumberSuggestions :many
+SELECT DISTINCT id, model_number, name
+FROM trains
+WHERE model_number ILIKE $1 || '%'
+ORDER BY model_number
+LIMIT $2
+OFFSET $3;
+

@@ -50,6 +50,8 @@ func (server *Server) setupRouter() {
 	router.POST("/users/login", server.loginUser)
 	router.POST("/renew_access", server.RenewAccessToken)
 
+	router.POST("/logout", server.Logout)
+
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
 
 	authRoutes.GET("/users/:id", server.getUser)
@@ -58,8 +60,11 @@ func (server *Server) setupRouter() {
 	authRoutes.POST("/trains", server.createTrain)
 	authRoutes.GET("/trains/:id", server.getTrain)
 	authRoutes.GET("/trains/model/:model_number", server.getTrainByModel)
+	router.GET("/trains/search", server.searchTrainsByModelNumberSuggestions)
 
-	authRoutes.GET("/trains", server.listTrain)
+	authRoutes.GET("/trains/all", server.listTrain)
+	authRoutes.GET("/trains", server.listUserTrains)
+
 	authRoutes.PUT("/trains", server.updateTrainValue)
 
 	authRoutes.GET("/users/:id/collection", server.listUserCollection)

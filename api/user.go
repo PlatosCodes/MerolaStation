@@ -173,12 +173,12 @@ type loginUserRequest struct {
 }
 
 type loginUserResponse struct {
-	SessionID uuid.UUID `json:"session_id"`
-	// AccessToken           string       `json:"access_token"`
-	// AccessTokenExpiresAt  time.Time    `json:"access_token_expires_at"`
-	// RefreshToken          string       `json:"refresh_token"`
-	// RefreshTokenExpiresAt time.Time    `json:"refresh_token_expires_at"`
-	User userResponse `json:"user"`
+	SessionID             uuid.UUID    `json:"session_id"`
+	AccessToken           string       `json:"access_token"`
+	AccessTokenExpiresAt  time.Time    `json:"access_token_expires_at"`
+	RefreshToken          string       `json:"refresh_token"`
+	RefreshTokenExpiresAt time.Time    `json:"refresh_token_expires_at"`
+	User                  userResponse `json:"user"`
 }
 
 func (server *Server) loginUser(ctx *gin.Context) {
@@ -245,12 +245,12 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	}
 
 	rsp := loginUserResponse{
-		SessionID: session.ID,
-		// AccessToken:           accessToken,
-		// AccessTokenExpiresAt:  accessPayload.ExpiresAt.Time,
-		// RefreshToken:          refreshToken,
-		// RefreshTokenExpiresAt: refreshPayload.ExpiresAt.Time,
-		User: newUserResponse(user),
+		SessionID:             session.ID,
+		AccessToken:           accessToken,
+		AccessTokenExpiresAt:  accessPayload.ExpiresAt.Time,
+		RefreshToken:          refreshToken,
+		RefreshTokenExpiresAt: refreshPayload.ExpiresAt.Time,
+		User:                  newUserResponse(user),
 	}
 
 	// Set the access token as an HttpOnly cookie

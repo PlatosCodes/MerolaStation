@@ -49,3 +49,16 @@ RETURNING *;
 
 -- name: DeleteCollectionTrain :exec
 DELETE from collection_trains WHERE user_id = $1 AND train_id = $2;
+
+-- name: ListUserTrains :many
+SELECT 
+    trains.*, 
+    CASE WHEN collection_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_collection
+FROM 
+    trains 
+LEFT JOIN 
+    collection_trains ON trains.id = collection_trains.train_id AND collection_trains.user_id = $1
+ORDER BY 
+    trains.id
+LIMIT $2 
+OFFSET $3;

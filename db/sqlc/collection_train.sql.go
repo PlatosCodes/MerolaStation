@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const createCollectionTrain = `-- name: CreateCollectionTrain :one
@@ -208,6 +209,69 @@ func (q *Queries) ListUserCollection(ctx context.Context, arg ListUserCollection
 			&i.TrainID,
 			&i.CreatedAt,
 			&i.TimesTraded,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUserTrains = `-- name: ListUserTrains :many
+SELECT 
+    trains.id, trains.model_number, trains.name, trains.value, trains.created_at, trains.version, trains.last_edited_at, 
+    CASE WHEN collection_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_collection
+FROM 
+    trains 
+LEFT JOIN 
+    collection_trains ON trains.id = collection_trains.train_id AND collection_trains.user_id = $1
+ORDER BY 
+    trains.id
+LIMIT $2 
+OFFSET $3
+`
+
+type ListUserTrainsParams struct {
+	UserID int64 `json:"user_id"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type ListUserTrainsRow struct {
+	ID             int64     `json:"id"`
+	ModelNumber    string    `json:"model_number"`
+	Name           string    `json:"name"`
+	Value          int64     `json:"value"`
+	CreatedAt      time.Time `json:"created_at"`
+	Version        int64     `json:"version"`
+	LastEditedAt   time.Time `json:"last_edited_at"`
+	IsInCollection bool      `json:"is_in_collection"`
+}
+
+func (q *Queries) ListUserTrains(ctx context.Context, arg ListUserTrainsParams) ([]ListUserTrainsRow, error) {
+	rows, err := q.db.QueryContext(ctx, listUserTrains, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListUserTrainsRow{}
+	for rows.Next() {
+		var i ListUserTrainsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ModelNumber,
+			&i.Name,
+			&i.Value,
+			&i.CreatedAt,
+			&i.Version,
+			&i.LastEditedAt,
+			&i.IsInCollection,
 		); err != nil {
 			return nil, err
 		}

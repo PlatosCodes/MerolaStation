@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	BlockSession(ctx context.Context, id uuid.UUID) error
 	CreateCollectionTrain(ctx context.Context, arg CreateCollectionTrainParams) (CollectionTrain, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateTradeOffer(ctx context.Context, arg CreateTradeOfferParams) (TradeOffer, error)
@@ -47,9 +48,11 @@ type Querier interface {
 	ListUserTradeOffers(ctx context.Context, arg ListUserTradeOffersParams) ([]TradeOffer, error)
 	ListUserTradeRequests(ctx context.Context, arg ListUserTradeRequestsParams) ([]TradeOffer, error)
 	ListUserTradeTransactions(ctx context.Context, arg ListUserTradeTransactionsParams) ([]TradeTransaction, error)
+	ListUserTrains(ctx context.Context, arg ListUserTrainsParams) ([]ListUserTrainsRow, error)
 	ListUserWishlist(ctx context.Context, arg ListUserWishlistParams) ([]WishlistTrain, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	ListWishlists(ctx context.Context, arg ListWishlistsParams) ([]WishlistTrain, error)
+	SearchTrainsByModelNumberSuggestions(ctx context.Context, arg SearchTrainsByModelNumberSuggestionsParams) ([]SearchTrainsByModelNumberSuggestionsRow, error)
 	UpdateCollectionTrain(ctx context.Context, arg UpdateCollectionTrainParams) (CollectionTrain, error)
 	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) (User, error)
 	UpdateTrainValue(ctx context.Context, arg UpdateTrainValueParams) error
