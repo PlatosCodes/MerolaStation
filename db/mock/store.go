@@ -419,6 +419,51 @@ func (mr *MockStoreMockRecorder) GetUserByUsername(arg0, arg1 interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsername", reflect.TypeOf((*MockStore)(nil).GetUserByUsername), arg0, arg1)
 }
 
+// GetUserCollectionWithWishlistStatus mocks base method.
+func (m *MockStore) GetUserCollectionWithWishlistStatus(arg0 context.Context, arg1 int64) ([]db.GetUserCollectionWithWishlistStatusRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserCollectionWithWishlistStatus", arg0, arg1)
+	ret0, _ := ret[0].([]db.GetUserCollectionWithWishlistStatusRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserCollectionWithWishlistStatus indicates an expected call of GetUserCollectionWithWishlistStatus.
+func (mr *MockStoreMockRecorder) GetUserCollectionWithWishlistStatus(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserCollectionWithWishlistStatus", reflect.TypeOf((*MockStore)(nil).GetUserCollectionWithWishlistStatus), arg0, arg1)
+}
+
+// GetUserWishlistWithCollectionStatus mocks base method.
+func (m *MockStore) GetUserWishlistWithCollectionStatus(arg0 context.Context, arg1 int64) ([]db.GetUserWishlistWithCollectionStatusRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserWishlistWithCollectionStatus", arg0, arg1)
+	ret0, _ := ret[0].([]db.GetUserWishlistWithCollectionStatusRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserWishlistWithCollectionStatus indicates an expected call of GetUserWishlistWithCollectionStatus.
+func (mr *MockStoreMockRecorder) GetUserWishlistWithCollectionStatus(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserWishlistWithCollectionStatus", reflect.TypeOf((*MockStore)(nil).GetUserWishlistWithCollectionStatus), arg0, arg1)
+}
+
+// GetWishlistTrain mocks base method.
+func (m *MockStore) GetWishlistTrain(arg0 context.Context, arg1 db.GetWishlistTrainParams) (db.WishlistTrain, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetWishlistTrain", arg0, arg1)
+	ret0, _ := ret[0].(db.WishlistTrain)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetWishlistTrain indicates an expected call of GetWishlistTrain.
+func (mr *MockStoreMockRecorder) GetWishlistTrain(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWishlistTrain", reflect.TypeOf((*MockStore)(nil).GetWishlistTrain), arg0, arg1)
+}
+
 // ListAllUserTradeOffers mocks base method.
 func (m *MockStore) ListAllUserTradeOffers(arg0 context.Context, arg1 db.ListAllUserTradeOffersParams) ([]db.TradeOffer, error) {
 	m.ctrl.T.Helper()

@@ -49,6 +49,7 @@ func (server *Server) setupRouter() {
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
 	router.POST("/renew_access", server.RenewAccessToken)
+	router.GET("/check_session", server.CheckUserSession)
 
 	router.POST("/logout", server.Logout)
 
@@ -60,7 +61,7 @@ func (server *Server) setupRouter() {
 	authRoutes.POST("/trains", server.createTrain)
 	authRoutes.GET("/trains/:id", server.getTrain)
 	authRoutes.GET("/trains/model/:model_number", server.getTrainByModel)
-	router.GET("/trains/search", server.searchTrainsByModelNumberSuggestions)
+	authRoutes.GET("/trains/search", server.searchTrainsByModelNumberSuggestions)
 
 	authRoutes.GET("/trains/all", server.listTrain)
 	authRoutes.GET("/trains", server.listUserTrains)
@@ -68,6 +69,9 @@ func (server *Server) setupRouter() {
 	authRoutes.PUT("/trains", server.updateTrainValue)
 
 	authRoutes.GET("/users/:id/collection", server.listUserCollection)
+	authRoutes.GET("/users/:id/collection/:train_id", server.getUserCollectionWithWishlistStatus)
+
+	authRoutes.GET("/users/:id/wishlist/:train_id", server.getUserWishlistWithCollectionStatus)
 
 	authRoutes.POST("/users/:id/collection/:train_id", server.createCollectionTrain)
 	authRoutes.DELETE("/users/:id/collection/:train_id", server.deleteCollectionTrain)

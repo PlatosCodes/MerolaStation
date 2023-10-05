@@ -3,7 +3,9 @@ package api
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
@@ -253,15 +255,6 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		User:                  newUserResponse(user),
 	}
 
-	// Set the access token as an HttpOnly cookie
-	http.SetCookie(ctx.Writer, &http.Cookie{
-		Name:     "access_token",
-		Value:    accessToken,
-		Expires:  accessPayload.ExpiresAt.Time,
-		HttpOnly: true,
-		Path:     "/",
-	})
-
 	// Set the refresh token as an HttpOnly cookie
 	http.SetCookie(ctx.Writer, &http.Cookie{
 		Name:     "refresh_token",
@@ -273,4 +266,20 @@ func (server *Server) loginUser(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, rsp)
 
+}
+
+func (server *Server) CheckUserSession(ctx *gin.Context) {
+	log.Println("we checking")
+	// Extract the token from the Authorization header
+	authorizationHeader := ctx.GetHeader("Authorization")
+	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
+
+	// Verify the token
+	_, err := server.tokenMaker.VerifyToken(token)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"isAuthenticated": false})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"isAuthenticated": true})
 }
