@@ -24,9 +24,21 @@ ORDER BY id
 LIMIT $1
 OFFSET $2;
 
+-- name: GetTotalTrainCount :one
+SELECT COUNT(*) FROM trains;
+
 -- name: UpdateTrainValue :exec
 UPDATE trains SET value = $2, version = version + 1
 WHERE id = $1;
 
 -- name: DeleteTrain :exec
 DELETE from trains WHERE id = $1;
+
+-- name: SearchTrainsByModelNumberSuggestions :many
+SELECT DISTINCT id, model_number, name
+FROM trains
+WHERE model_number ILIKE $1 || '%'
+ORDER BY model_number
+LIMIT $2
+OFFSET $3;
+

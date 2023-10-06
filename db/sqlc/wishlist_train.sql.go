@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const createWishlistTrain = `-- name: CreateWishlistTrain :one
@@ -47,6 +48,75 @@ type DeleteWishlistTrainParams struct {
 func (q *Queries) DeleteWishlistTrain(ctx context.Context, arg DeleteWishlistTrainParams) error {
 	_, err := q.db.ExecContext(ctx, deleteWishlistTrain, arg.UserID, arg.TrainID)
 	return err
+}
+
+const getUserWishlistWithCollectionStatus = `-- name: GetUserWishlistWithCollectionStatus :many
+SELECT 
+    w.id, w.user_id, w.train_id, w.created_at,
+    CASE WHEN c.train_id IS NULL THEN false ELSE true END AS is_in_collection
+FROM wishlist_trains w
+LEFT JOIN collection_trains c ON w.train_id = c.train_id AND w.user_id = c.user_id
+WHERE w.user_id = $1
+`
+
+type GetUserWishlistWithCollectionStatusRow struct {
+	ID             int64     `json:"id"`
+	UserID         int64     `json:"user_id"`
+	TrainID        int64     `json:"train_id"`
+	CreatedAt      time.Time `json:"created_at"`
+	IsInCollection bool      `json:"is_in_collection"`
+}
+
+func (q *Queries) GetUserWishlistWithCollectionStatus(ctx context.Context, userID int64) ([]GetUserWishlistWithCollectionStatusRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserWishlistWithCollectionStatus, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetUserWishlistWithCollectionStatusRow{}
+	for rows.Next() {
+		var i GetUserWishlistWithCollectionStatusRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.TrainID,
+			&i.CreatedAt,
+			&i.IsInCollection,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getWishlistTrain = `-- name: GetWishlistTrain :one
+SELECT id, user_id, train_id, created_at FROM wishlist_trains
+WHERE user_id = $1 AND train_id = $2
+LIMIT 1
+`
+
+type GetWishlistTrainParams struct {
+	UserID  int64 `json:"user_id"`
+	TrainID int64 `json:"train_id"`
+}
+
+func (q *Queries) GetWishlistTrain(ctx context.Context, arg GetWishlistTrainParams) (WishlistTrain, error) {
+	row := q.db.QueryRowContext(ctx, getWishlistTrain, arg.UserID, arg.TrainID)
+	var i WishlistTrain
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TrainID,
+		&i.CreatedAt,
+	)
+	return i, err
 }
 
 const listUserWishlist = `-- name: ListUserWishlist :many

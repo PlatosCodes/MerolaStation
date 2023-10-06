@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
@@ -93,7 +94,7 @@ func (server *Server) getTrainByModel(ctx *gin.Context) {
 
 type listTrainRequest struct {
 	PageID   int32 `form:"page_id" binding:"required,min=1"`
-	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
+	PageSize int32 `form:"page_size" binding:"required,min=5,max=25"`
 }
 
 func (server *Server) listTrain(ctx *gin.Context) {
@@ -121,6 +122,50 @@ func (server *Server) listTrain(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, trains)
+}
+
+type ListUserTrainsWithPagesResponse struct {
+	TotalCount int64                  `json:"total_count"`
+	Trains     []db.ListUserTrainsRow `json:"trains"`
+}
+
+func (server *Server) listUserTrainsWithPages(ctx *gin.Context) {
+	var req listTrainRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	arg := db.ListUserTrainsParams{
+		UserID: authPayload.UserID, // <-- Include the UserID in the params
+		Limit:  req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
+	}
+
+	trains, err := server.Store.ListUserTrains(ctx, arg) // <-- Call the new ListUserTrains method
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse((err)))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// Query total count of trains
+	totalCount, err := server.Store.GetTotalTrainCount(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	response := ListUserTrainsWithPagesResponse{
+		TotalCount: totalCount,
+		Trains:     trains,
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }
 
 type updateTrainValueRequest struct {
@@ -153,4 +198,76 @@ func (server *Server) updateTrainValue(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, req.Value)
+}
+
+func (server *Server) listUserTrains(ctx *gin.Context) {
+	var req listTrainRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	arg := db.ListUserTrainsParams{
+		UserID: authPayload.UserID, // <-- Include the UserID in the params
+		Limit:  req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
+	}
+
+	trains, err := server.Store.ListUserTrains(ctx, arg) // <-- Call the new ListUserTrains method
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse((err)))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, trains)
+}
+
+type searchTrainByModelNumberSuggestionRequest struct {
+	ModelNumber string `form:"model_number" binding:"required" default:""`
+	PageSize    int    `form:"page_size" binding:"required" default:"10"`
+	PageID      int    `form:"page_id" binding:"required" default:"1"`
+}
+
+func (server *Server) searchTrainsByModelNumberSuggestions(ctx *gin.Context) {
+
+	var req searchTrainByModelNumberSuggestionRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		log.Printf("Bind error: %v", err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	limit := int32(req.PageSize)
+
+	// Build the ILIKE pattern for model number
+	modelNumberPattern := sql.NullString{
+		String: req.ModelNumber + "%",
+		Valid:  true,
+	}
+
+	// Fetch trains based on model number
+	searchParams := db.SearchTrainsByModelNumberSuggestionsParams{
+		Column1: modelNumberPattern,
+		Limit:   limit,
+		Offset:  int32((req.PageID - 1) * req.PageSize),
+	}
+
+	trains, err := server.Store.SearchTrainsByModelNumberSuggestions(ctx, searchParams)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	log.Printf("Bind : %v", trains)
+
+	ctx.JSON(http.StatusOK, trains)
 }

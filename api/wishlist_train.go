@@ -107,6 +107,42 @@ func (server *Server) listUserWishlist(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, trains)
 }
 
+type getUserWishlistTrainRequest struct {
+	ID      int64 `uri:"id" form:"required,min=1"`
+	TrainID int64 `uri:"train_id" form:"required,min=1"`
+}
+
+func (server *Server) getUserWishlistTrain(ctx *gin.Context) {
+	var path getUserWishlistTrainRequest
+
+	if err := ctx.ShouldBindUri(&path); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	if path.ID != authPayload.UserID {
+		ctx.JSON(http.StatusUnauthorized, fmt.Errorf("you do not have permission to view this wishlist"))
+		return
+	}
+
+	wishlistTrain, err := server.Store.GetWishlistTrain(context.Background(), db.GetWishlistTrainParams{
+		UserID:  path.ID,
+		TrainID: path.TrainID,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusOK, gin.H{"isInWishlist": false})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"isInWishlist": true, "train": wishlistTrain})
+}
+
 type deleteWishlistTrainRequest struct {
 	ID      int64 `uri:"id" form:"required,min=1"`
 	TrainID int64 `uri:"train_id" form:"required,min=1"`
@@ -138,4 +174,33 @@ func (server *Server) deleteWishlistTrain(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, "Train successfully removed from wishlist.")
+}
+
+type WishlistTrainWithCollectionStatus struct {
+	WishlistTrain  db.WishlistTrain
+	IsInCollection bool `json:"is_in_collection"`
+}
+
+func (server *Server) getUserWishlistWithCollectionStatus(ctx *gin.Context) {
+	var path UserCollectionPath // Using the same structure since it only contains UserID
+
+	if err := ctx.ShouldBindUri(&path); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	if path.UserID != authPayload.UserID {
+		ctx.JSON(http.StatusUnauthorized, fmt.Errorf("you do not have permission to view this wishlist"))
+		return
+	}
+
+	trains, err := server.Store.GetUserWishlistWithCollectionStatus(context.Background(), path.UserID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, trains)
 }

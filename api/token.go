@@ -19,13 +19,13 @@ type RenewAccessTokenResponse struct {
 }
 
 func (server *Server) RenewAccessToken(ctx *gin.Context) {
-	var req RenewAccessTokenRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	refreshTokenCookie, err := ctx.Cookie("refresh_token")
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	refreshPayload, err := server.tokenMaker.VerifyToken(req.RefreshToken)
+	refreshPayload, err := server.tokenMaker.VerifyToken(refreshTokenCookie)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 	}
@@ -49,7 +49,7 @@ func (server *Server) RenewAccessToken(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 	}
 
-	if session.RefreshToken != req.RefreshToken {
+	if session.RefreshToken != refreshTokenCookie {
 		err := fmt.Errorf("mismatched session token")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 	}
@@ -76,4 +76,31 @@ func (server *Server) RenewAccessToken(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, rsp)
 
+}
+
+func (server *Server) Logout(ctx *gin.Context) {
+	// Get the refresh token from the cookie
+	refreshTokenCookie, err := ctx.Cookie("refresh_token")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	// Verify if the refresh token is valid
+	refreshPayload, err := server.tokenMaker.VerifyToken(refreshTokenCookie)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	// Invalidate the session associated with the refresh token
+	if err := server.Store.BlockSession(ctx, refreshPayload.ID); err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// Optionally, you can clear the refresh_token cookie on the client side.
+	ctx.SetCookie("refresh_token", "", -1, "", "", false, true)
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 }

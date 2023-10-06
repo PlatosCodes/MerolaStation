@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createTrain = `-- name: CreateTrain :one
@@ -45,6 +46,17 @@ DELETE from trains WHERE id = $1
 func (q *Queries) DeleteTrain(ctx context.Context, id int64) error {
 	_, err := q.db.ExecContext(ctx, deleteTrain, id)
 	return err
+}
+
+const getTotalTrainCount = `-- name: GetTotalTrainCount :one
+SELECT COUNT(*) FROM trains
+`
+
+func (q *Queries) GetTotalTrainCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getTotalTrainCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const getTrain = `-- name: GetTrain :one
@@ -137,6 +149,50 @@ func (q *Queries) ListTrains(ctx context.Context, arg ListTrainsParams) ([]Train
 			&i.Version,
 			&i.LastEditedAt,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchTrainsByModelNumberSuggestions = `-- name: SearchTrainsByModelNumberSuggestions :many
+SELECT DISTINCT id, model_number, name
+FROM trains
+WHERE model_number ILIKE $1 || '%'
+ORDER BY model_number
+LIMIT $2
+OFFSET $3
+`
+
+type SearchTrainsByModelNumberSuggestionsParams struct {
+	Column1 sql.NullString `json:"column_1"`
+	Limit   int32          `json:"limit"`
+	Offset  int32          `json:"offset"`
+}
+
+type SearchTrainsByModelNumberSuggestionsRow struct {
+	ID          int64  `json:"id"`
+	ModelNumber string `json:"model_number"`
+	Name        string `json:"name"`
+}
+
+func (q *Queries) SearchTrainsByModelNumberSuggestions(ctx context.Context, arg SearchTrainsByModelNumberSuggestionsParams) ([]SearchTrainsByModelNumberSuggestionsRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchTrainsByModelNumberSuggestions, arg.Column1, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SearchTrainsByModelNumberSuggestionsRow{}
+	for rows.Next() {
+		var i SearchTrainsByModelNumberSuggestionsRow
+		if err := rows.Scan(&i.ID, &i.ModelNumber, &i.Name); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

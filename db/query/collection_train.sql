@@ -49,3 +49,27 @@ RETURNING *;
 
 -- name: DeleteCollectionTrain :exec
 DELETE from collection_trains WHERE user_id = $1 AND train_id = $2;
+
+-- name: ListUserTrains :many
+SELECT 
+    trains.*, 
+    CASE WHEN collection_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_collection,
+    CASE WHEN wishlist_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_wishlist
+FROM 
+    trains 
+LEFT JOIN 
+    collection_trains ON trains.id = collection_trains.train_id AND collection_trains.user_id = $1
+LEFT JOIN
+    wishlist_trains ON trains.id = wishlist_trains.train_id AND wishlist_trains.user_id = $1
+ORDER BY 
+    trains.id
+LIMIT $2 
+OFFSET $3;
+
+-- name: GetUserCollectionWithWishlistStatus :many
+SELECT 
+    c.*,
+    CASE WHEN w.train_id IS NULL THEN false ELSE true END AS is_in_wishlist
+FROM collection_trains c
+LEFT JOIN wishlist_trains w ON c.train_id = w.train_id AND w.user_id = c.user_id
+WHERE c.user_id = $1;

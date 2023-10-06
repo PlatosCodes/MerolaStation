@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const createCollectionTrain = `-- name: CreateCollectionTrain :one
@@ -138,6 +139,54 @@ func (q *Queries) GetCollectionTrainforUpdateByID(ctx context.Context, id int64)
 	return i, err
 }
 
+const getUserCollectionWithWishlistStatus = `-- name: GetUserCollectionWithWishlistStatus :many
+SELECT 
+    c.id, c.user_id, c.train_id, c.created_at, c.times_traded,
+    CASE WHEN w.train_id IS NULL THEN false ELSE true END AS is_in_wishlist
+FROM collection_trains c
+LEFT JOIN wishlist_trains w ON c.train_id = w.train_id AND w.user_id = c.user_id
+WHERE c.user_id = $1
+`
+
+type GetUserCollectionWithWishlistStatusRow struct {
+	ID           int64     `json:"id"`
+	UserID       int64     `json:"user_id"`
+	TrainID      int64     `json:"train_id"`
+	CreatedAt    time.Time `json:"created_at"`
+	TimesTraded  int64     `json:"times_traded"`
+	IsInWishlist bool      `json:"is_in_wishlist"`
+}
+
+func (q *Queries) GetUserCollectionWithWishlistStatus(ctx context.Context, userID int64) ([]GetUserCollectionWithWishlistStatusRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserCollectionWithWishlistStatus, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetUserCollectionWithWishlistStatusRow{}
+	for rows.Next() {
+		var i GetUserCollectionWithWishlistStatusRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.TrainID,
+			&i.CreatedAt,
+			&i.TimesTraded,
+			&i.IsInWishlist,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listCollectionTrains = `-- name: ListCollectionTrains :many
 SELECT id, user_id, train_id, created_at, times_traded FROM collection_trains
 ORDER BY user_id
@@ -208,6 +257,74 @@ func (q *Queries) ListUserCollection(ctx context.Context, arg ListUserCollection
 			&i.TrainID,
 			&i.CreatedAt,
 			&i.TimesTraded,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUserTrains = `-- name: ListUserTrains :many
+SELECT 
+    trains.id, trains.model_number, trains.name, trains.value, trains.created_at, trains.version, trains.last_edited_at, 
+    CASE WHEN collection_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_collection,
+    CASE WHEN wishlist_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_wishlist
+FROM 
+    trains 
+LEFT JOIN 
+    collection_trains ON trains.id = collection_trains.train_id AND collection_trains.user_id = $1
+LEFT JOIN
+    wishlist_trains ON trains.id = wishlist_trains.train_id AND wishlist_trains.user_id = $1
+ORDER BY 
+    trains.id
+LIMIT $2 
+OFFSET $3
+`
+
+type ListUserTrainsParams struct {
+	UserID int64 `json:"user_id"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type ListUserTrainsRow struct {
+	ID             int64     `json:"id"`
+	ModelNumber    string    `json:"model_number"`
+	Name           string    `json:"name"`
+	Value          int64     `json:"value"`
+	CreatedAt      time.Time `json:"created_at"`
+	Version        int64     `json:"version"`
+	LastEditedAt   time.Time `json:"last_edited_at"`
+	IsInCollection bool      `json:"is_in_collection"`
+	IsInWishlist   bool      `json:"is_in_wishlist"`
+}
+
+func (q *Queries) ListUserTrains(ctx context.Context, arg ListUserTrainsParams) ([]ListUserTrainsRow, error) {
+	rows, err := q.db.QueryContext(ctx, listUserTrains, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListUserTrainsRow{}
+	for rows.Next() {
+		var i ListUserTrainsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ModelNumber,
+			&i.Name,
+			&i.Value,
+			&i.CreatedAt,
+			&i.Version,
+			&i.LastEditedAt,
+			&i.IsInCollection,
+			&i.IsInWishlist,
 		); err != nil {
 			return nil, err
 		}

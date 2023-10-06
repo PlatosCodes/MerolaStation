@@ -3,7 +3,9 @@ package api
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
@@ -176,17 +178,24 @@ type loginUserResponse struct {
 	SessionID             uuid.UUID    `json:"session_id"`
 	AccessToken           string       `json:"access_token"`
 	AccessTokenExpiresAt  time.Time    `json:"access_token_expires_at"`
-	RefreskToken          string       `json:"refresh_token"`
+	RefreshToken          string       `json:"refresh_token"`
 	RefreshTokenExpiresAt time.Time    `json:"refresh_token_expires_at"`
 	User                  userResponse `json:"user"`
 }
 
 func (server *Server) loginUser(ctx *gin.Context) {
 	var req loginUserRequest
+	fmt.Println(req)
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	// Use this if want to send a more generic message in response:
+	// if err := ctx.ShouldBindJSON(&req); err != nil {
+	// 	log.Printf("Error binding login request: %v", err) // Log the detailed error
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error. Please try again later."})
+	// 	return
+	// }
 
 	user, err := server.Store.GetUserByUsername(ctx, req.Username)
 	if err != nil {
@@ -200,6 +209,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	err = util.CheckPassword(req.Password, user.HashedPassword)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
 	}
 
 	accessToken, accessPayload, err := server.tokenMaker.CreateToken(
@@ -240,11 +250,36 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		SessionID:             session.ID,
 		AccessToken:           accessToken,
 		AccessTokenExpiresAt:  accessPayload.ExpiresAt.Time,
-		RefreskToken:          refreshToken,
+		RefreshToken:          refreshToken,
 		RefreshTokenExpiresAt: refreshPayload.ExpiresAt.Time,
 		User:                  newUserResponse(user),
 	}
 
+	// Set the refresh token as an HttpOnly cookie
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Expires:  refreshPayload.ExpiresAt.Time,
+		HttpOnly: true,
+		Path:     "/",
+	})
+
 	ctx.JSON(http.StatusOK, rsp)
 
+}
+
+func (server *Server) CheckUserSession(ctx *gin.Context) {
+	log.Println("we checking")
+	// Extract the token from the Authorization header
+	authorizationHeader := ctx.GetHeader("Authorization")
+	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
+
+	// Verify the token
+	_, err := server.tokenMaker.VerifyToken(token)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"isAuthenticated": false})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"isAuthenticated": true})
 }

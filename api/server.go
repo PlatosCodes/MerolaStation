@@ -6,6 +6,7 @@ import (
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
 	"github.com/PlatosCodes/MerolaStation/token"
 	"github.com/PlatosCodes/MerolaStation/util"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,9 +36,22 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 func (server *Server) setupRouter() {
 	router := gin.Default()
 
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:3000"} // This should be your frontend's address
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+
+	config.AllowCredentials = true // Important!
+	config.ExposeHeaders = []string{"Authorization"}
+
+	router.Use(cors.New(config))
+
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
 	router.POST("/renew_access", server.RenewAccessToken)
+	router.GET("/check_session", server.CheckUserSession)
+
+	router.POST("/logout", server.Logout)
 
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
 
@@ -47,11 +61,20 @@ func (server *Server) setupRouter() {
 	authRoutes.POST("/trains", server.createTrain)
 	authRoutes.GET("/trains/:id", server.getTrain)
 	authRoutes.GET("/trains/model/:model_number", server.getTrainByModel)
+	authRoutes.GET("/trains/search", server.searchTrainsByModelNumberSuggestions)
 
-	authRoutes.GET("/trains", server.listTrain)
+	authRoutes.GET("/trains/all", server.listTrain)
+
+	//Since only logged in users can see, return custom TrainsList for users with wishlist/collection data
+	// authRoutes.GET("/trains", server.listUserTrains)
+	authRoutes.GET("/trains", server.listUserTrainsWithPages)
+
 	authRoutes.PUT("/trains", server.updateTrainValue)
 
 	authRoutes.GET("/users/:id/collection", server.listUserCollection)
+	authRoutes.GET("/users/:id/collection/:train_id", server.getUserCollectionWithWishlistStatus)
+
+	authRoutes.GET("/users/:id/wishlist/:train_id", server.getUserWishlistWithCollectionStatus)
 
 	authRoutes.POST("/users/:id/collection/:train_id", server.createCollectionTrain)
 	authRoutes.DELETE("/users/:id/collection/:train_id", server.deleteCollectionTrain)
