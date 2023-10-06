@@ -124,6 +124,50 @@ func (server *Server) listTrain(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, trains)
 }
 
+type ListUserTrainsWithPagesResponse struct {
+	TotalCount int64                  `json:"total_count"`
+	Trains     []db.ListUserTrainsRow `json:"trains"`
+}
+
+func (server *Server) listUserTrainsWithPages(ctx *gin.Context) {
+	var req listTrainRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	arg := db.ListUserTrainsParams{
+		UserID: authPayload.UserID, // <-- Include the UserID in the params
+		Limit:  req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
+	}
+
+	trains, err := server.Store.ListUserTrains(ctx, arg) // <-- Call the new ListUserTrains method
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse((err)))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// Query total count of trains
+	totalCount, err := server.Store.GetTotalTrainCount(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	response := ListUserTrainsWithPagesResponse{
+		TotalCount: totalCount,
+		Trains:     trains,
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}
+
 type updateTrainValueRequest struct {
 	ID    int64 `json:"id" binding:"required,min=1"`
 	Value int64 `json:"value" binding:"required,min=1"`

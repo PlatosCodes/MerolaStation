@@ -48,6 +48,17 @@ func (q *Queries) DeleteTrain(ctx context.Context, id int64) error {
 	return err
 }
 
+const getTotalTrainCount = `-- name: GetTotalTrainCount :one
+SELECT COUNT(*) FROM trains
+`
+
+func (q *Queries) GetTotalTrainCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getTotalTrainCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getTrain = `-- name: GetTrain :one
 SELECT id, model_number, name, value, created_at, version, last_edited_at FROM trains
 WHERE id = $1 LIMIT 1

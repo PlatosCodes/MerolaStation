@@ -30,6 +30,7 @@ type Querier interface {
 	GetCollectionTrainforUpdate(ctx context.Context, arg GetCollectionTrainforUpdateParams) (CollectionTrain, error)
 	GetCollectionTrainforUpdateByID(ctx context.Context, id int64) (CollectionTrain, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
+	GetTotalTrainCount(ctx context.Context) (int64, error)
 	GetTradeOfferByTradeID(ctx context.Context, id int64) (TradeOffer, error)
 	GetTradeTransaction(ctx context.Context, id int64) (TradeTransaction, error)
 	GetTrain(ctx context.Context, id int64) (Train, error)

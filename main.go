@@ -37,7 +37,13 @@ func main() {
 
 	// FOR ADDING TRAIN DATA
 	ctx := &gin.Context{}
-	loadCSVDataToDB(ctx, server)
+	trainCount, err := server.Store.GetTotalTrainCount(ctx)
+	if err != nil {
+		log.Fatal("cannot get initial train count", err)
+	}
+	if trainCount == 0 {
+		loadCSVDataToDB(ctx, server)
+	}
 
 	err = server.Start(config.ServerAddress)
 	if err != nil {

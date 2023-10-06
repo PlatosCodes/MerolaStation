@@ -24,6 +24,9 @@ ORDER BY id
 LIMIT $1
 OFFSET $2;
 
+-- name: GetTotalTrainCount :one
+SELECT COUNT(*) FROM trains;
+
 -- name: UpdateTrainValue :exec
 UPDATE trains SET value = $2, version = version + 1
 WHERE id = $1;
