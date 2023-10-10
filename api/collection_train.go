@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
@@ -90,9 +91,9 @@ func (server *Server) listUserCollection(ctx *gin.Context) {
 		return
 	}
 
-	trains := []db.Train{}
+	trains := []db.GetTrainDetailRow{}
 	for _, ct := range collectionTrains {
-		train, err := server.Store.GetTrain(context.Background(), ct.TrainID)
+		train, err := server.Store.GetTrainDetail(context.Background(), db.GetTrainDetailParams{ID: ct.TrainID, UserID: authPayload.UserID})
 		if err != nil {
 			if err == sql.ErrNoRows {
 				ctx.JSON(http.StatusNotFound, errorResponse(err))
@@ -101,6 +102,7 @@ func (server *Server) listUserCollection(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 			return
 		}
+		log.Println(train)
 		trains = append(trains, train)
 	}
 
