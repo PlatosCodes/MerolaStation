@@ -28,6 +28,7 @@ func (server *Server) RenewAccessToken(ctx *gin.Context) {
 	refreshPayload, err := server.tokenMaker.VerifyToken(refreshTokenCookie)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
 	}
 
 	session, err := server.Store.GetSession(ctx, refreshPayload.ID)
@@ -42,21 +43,25 @@ func (server *Server) RenewAccessToken(ctx *gin.Context) {
 	if session.IsBlocked {
 		err := fmt.Errorf("blocked session")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
 	}
 
 	if session.Username != refreshPayload.Username {
 		err := fmt.Errorf("incorrect session user")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
 	}
 
 	if session.RefreshToken != refreshTokenCookie {
 		err := fmt.Errorf("mismatched session token")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
 	}
 
 	if time.Now().After(session.ExpiresAt) {
 		err := fmt.Errorf("expired session")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
 	}
 
 	accessToken, accessPayload, err := server.tokenMaker.CreateToken(

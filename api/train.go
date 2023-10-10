@@ -234,6 +234,10 @@ type searchTrainByModelNumberSuggestionRequest struct {
 	PageID      int    `form:"page_id" binding:"required" default:"1"`
 }
 
+type SearchTrainsByModelNumberResponse struct {
+	Trains []db.SearchTrainsByModelNumberSuggestionsRow `json:"trains"`
+}
+
 func (server *Server) searchTrainsByModelNumberSuggestions(ctx *gin.Context) {
 
 	var req searchTrainByModelNumberSuggestionRequest
@@ -267,7 +271,10 @@ func (server *Server) searchTrainsByModelNumberSuggestions(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	log.Printf("Bind : %v", trains)
+	response := SearchTrainsByModelNumberResponse{
+		Trains: trains,
+	}
 
-	ctx.JSON(http.StatusOK, trains)
+	ctx.JSON(http.StatusOK, response)
+
 }

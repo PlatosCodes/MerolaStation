@@ -3,7 +3,6 @@ package api
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -269,7 +268,6 @@ func (server *Server) loginUser(ctx *gin.Context) {
 }
 
 func (server *Server) CheckUserSession(ctx *gin.Context) {
-	log.Println("we checking")
 	// Extract the token from the Authorization header
 	authorizationHeader := ctx.GetHeader("Authorization")
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
