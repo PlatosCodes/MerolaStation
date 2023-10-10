@@ -36,6 +36,7 @@ type Querier interface {
 	GetTrain(ctx context.Context, id int64) (Train, error)
 	GetTrainByModel(ctx context.Context, modelNumber string) (Train, error)
 	GetTrainByName(ctx context.Context, name string) (Train, error)
+	GetTrainDetail(ctx context.Context, arg GetTrainDetailParams) (GetTrainDetailRow, error)
 	GetUser(ctx context.Context, id int64) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUserCollectionWithWishlistStatus(ctx context.Context, userID int64) ([]GetUserCollectionWithWishlistStatusRow, error)

@@ -10,6 +10,21 @@ INSERT INTO trains (
 SELECT * FROM trains
 WHERE id = $1 LIMIT 1;
 
+-- name: GetTrainDetail :one
+SELECT 
+    trains.*,
+    CASE WHEN collection_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_collection,
+    CASE WHEN wishlist_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_wishlist
+FROM 
+    trains 
+LEFT JOIN 
+    collection_trains ON trains.id = collection_trains.train_id AND collection_trains.user_id = $2
+LEFT JOIN 
+    wishlist_trains ON trains.id = wishlist_trains.train_id AND wishlist_trains.user_id = $2
+WHERE 
+    trains.id = $1 
+LIMIT 1;
+
 -- name: GetTrainByModel :one
 SELECT * FROM trains
 WHERE model_number = $1 LIMIT 1;

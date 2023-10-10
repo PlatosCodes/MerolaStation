@@ -66,6 +66,34 @@ func (server *Server) getTrain(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, train)
 }
 
+type getTrainDetailRequest struct {
+	ID int64 `uri:"id" binding:"required,min=1"`
+}
+
+func (server *Server) getTrainDetail(ctx *gin.Context) {
+	var req getTrainDetailRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	id := req.ID
+
+	train, err := server.Store.GetTrainDetail(ctx, db.GetTrainDetailParams{ID: id, UserID: authPayload.UserID})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse((err)))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	log.Println(train)
+	ctx.JSON(http.StatusOK, train)
+}
+
 type getTrainByModelRequest struct {
 	ModelNumber string `uri:"model_number" binding:"required,min=1"`
 }

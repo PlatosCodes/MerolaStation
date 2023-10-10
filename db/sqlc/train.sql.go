@@ -8,6 +8,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 const createTrain = `-- name: CreateTrain :one
@@ -115,6 +116,56 @@ func (q *Queries) GetTrainByName(ctx context.Context, name string) (Train, error
 		&i.CreatedAt,
 		&i.Version,
 		&i.LastEditedAt,
+	)
+	return i, err
+}
+
+const getTrainDetail = `-- name: GetTrainDetail :one
+SELECT 
+    trains.id, trains.model_number, trains.name, trains.value, trains.created_at, trains.version, trains.last_edited_at,
+    CASE WHEN collection_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_collection,
+    CASE WHEN wishlist_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_wishlist
+FROM 
+    trains 
+LEFT JOIN 
+    collection_trains ON trains.id = collection_trains.train_id AND collection_trains.user_id = $2
+LEFT JOIN 
+    wishlist_trains ON trains.id = wishlist_trains.train_id AND wishlist_trains.user_id = $2
+WHERE 
+    trains.id = $1 
+LIMIT 1
+`
+
+type GetTrainDetailParams struct {
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
+}
+
+type GetTrainDetailRow struct {
+	ID             int64     `json:"id"`
+	ModelNumber    string    `json:"model_number"`
+	Name           string    `json:"name"`
+	Value          int64     `json:"value"`
+	CreatedAt      time.Time `json:"created_at"`
+	Version        int64     `json:"version"`
+	LastEditedAt   time.Time `json:"last_edited_at"`
+	IsInCollection bool      `json:"is_in_collection"`
+	IsInWishlist   bool      `json:"is_in_wishlist"`
+}
+
+func (q *Queries) GetTrainDetail(ctx context.Context, arg GetTrainDetailParams) (GetTrainDetailRow, error) {
+	row := q.db.QueryRowContext(ctx, getTrainDetail, arg.ID, arg.UserID)
+	var i GetTrainDetailRow
+	err := row.Scan(
+		&i.ID,
+		&i.ModelNumber,
+		&i.Name,
+		&i.Value,
+		&i.CreatedAt,
+		&i.Version,
+		&i.LastEditedAt,
+		&i.IsInCollection,
+		&i.IsInWishlist,
 	)
 	return i, err
 }

@@ -404,6 +404,21 @@ func (mr *MockStoreMockRecorder) GetTrainByName(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrainByName", reflect.TypeOf((*MockStore)(nil).GetTrainByName), arg0, arg1)
 }
 
+// GetTrainDetail mocks base method.
+func (m *MockStore) GetTrainDetail(arg0 context.Context, arg1 db.GetTrainDetailParams) (db.GetTrainDetailRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTrainDetail", arg0, arg1)
+	ret0, _ := ret[0].(db.GetTrainDetailRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTrainDetail indicates an expected call of GetTrainDetail.
+func (mr *MockStoreMockRecorder) GetTrainDetail(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrainDetail", reflect.TypeOf((*MockStore)(nil).GetTrainDetail), arg0, arg1)
+}
+
 // GetUser mocks base method.
 func (m *MockStore) GetUser(arg0 context.Context, arg1 int64) (db.User, error) {
 	m.ctrl.T.Helper()
