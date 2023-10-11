@@ -338,3 +338,54 @@ func (server *Server) searchTrainsByModelNumberSuggestions(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, response)
 
 }
+
+type searchTrainByNameSuggestionRequest struct {
+	Name     string `form:"name" binding:"required"`
+	PageSize int    `form:"page_size" binding:"required" default:"10"`
+	PageID   int    `form:"page_id" binding:"required" default:"1"`
+}
+
+// This can be the same response type as search by model number
+type SearchTrainsByNameResponse struct {
+	Trains []db.SearchTrainsByNameSuggestionsRow `json:"trains"`
+}
+
+func (server *Server) searchTrainsByNameSuggestions(ctx *gin.Context) {
+	var req searchTrainByNameSuggestionRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		log.Printf("Bind error: %v", err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	limit := int32(req.PageSize)
+
+	namePattern := sql.NullString{
+		String: "%" + req.Name + "%",
+		Valid:  true,
+	}
+
+	log.Println("rsp:", namePattern)
+
+	searchParams := db.SearchTrainsByNameSuggestionsParams{
+		Column1: namePattern,
+		Limit:   limit,
+		Offset:  int32((req.PageID - 1) * req.PageSize),
+	}
+
+	trains, err := server.Store.SearchTrainsByNameSuggestions(ctx, searchParams)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	response := SearchTrainsByNameResponse{
+		Trains: trains,
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}

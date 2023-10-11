@@ -69,6 +69,7 @@ func (server *Server) setupRouter() {
 
 	authRoutes.GET("/trains/model/:model_number", server.getTrainByModel)
 	authRoutes.GET("/trains/search", server.searchTrainsByModelNumberSuggestions)
+	authRoutes.GET("/trains/search_by_name", server.searchTrainsByNameSuggestions)
 
 	authRoutes.GET("/trains/all", server.listTrain)
 

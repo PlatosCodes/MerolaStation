@@ -296,6 +296,50 @@ func (q *Queries) SearchTrainsByModelNumberSuggestions(ctx context.Context, arg 
 	return items, nil
 }
 
+const searchTrainsByNameSuggestions = `-- name: SearchTrainsByNameSuggestions :many
+SELECT DISTINCT id, model_number, name
+FROM trains
+WHERE name ILIKE $1 || '%'
+ORDER BY name
+LIMIT $2
+OFFSET $3
+`
+
+type SearchTrainsByNameSuggestionsParams struct {
+	Column1 sql.NullString `json:"column_1"`
+	Limit   int32          `json:"limit"`
+	Offset  int32          `json:"offset"`
+}
+
+type SearchTrainsByNameSuggestionsRow struct {
+	ID          int64  `json:"id"`
+	ModelNumber string `json:"model_number"`
+	Name        string `json:"name"`
+}
+
+func (q *Queries) SearchTrainsByNameSuggestions(ctx context.Context, arg SearchTrainsByNameSuggestionsParams) ([]SearchTrainsByNameSuggestionsRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchTrainsByNameSuggestions, arg.Column1, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SearchTrainsByNameSuggestionsRow{}
+	for rows.Next() {
+		var i SearchTrainsByNameSuggestionsRow
+		if err := rows.Scan(&i.ID, &i.ModelNumber, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateTrainImageUrl = `-- name: UpdateTrainImageUrl :exec
 
 UPDATE trains SET img_url = $2, version = version + 1

@@ -837,6 +837,21 @@ func (mr *MockStoreMockRecorder) SearchTrainsByModelNumberSuggestions(arg0, arg1
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTrainsByModelNumberSuggestions", reflect.TypeOf((*MockStore)(nil).SearchTrainsByModelNumberSuggestions), arg0, arg1)
 }
 
+// SearchTrainsByNameSuggestions mocks base method.
+func (m *MockStore) SearchTrainsByNameSuggestions(arg0 context.Context, arg1 db.SearchTrainsByNameSuggestionsParams) ([]db.SearchTrainsByNameSuggestionsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchTrainsByNameSuggestions", arg0, arg1)
+	ret0, _ := ret[0].([]db.SearchTrainsByNameSuggestionsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchTrainsByNameSuggestions indicates an expected call of SearchTrainsByNameSuggestions.
+func (mr *MockStoreMockRecorder) SearchTrainsByNameSuggestions(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTrainsByNameSuggestions", reflect.TypeOf((*MockStore)(nil).SearchTrainsByNameSuggestions), arg0, arg1)
+}
+
 // TradeTx mocks base method.
 func (m *MockStore) TradeTx(arg0 context.Context, arg1 db.TradeTxParams) (db.TradeTxResult, error) {
 	m.ctrl.T.Helper()

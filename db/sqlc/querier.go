@@ -64,6 +64,7 @@ type Querier interface {
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	ListWishlists(ctx context.Context, arg ListWishlistsParams) ([]WishlistTrain, error)
 	SearchTrainsByModelNumberSuggestions(ctx context.Context, arg SearchTrainsByModelNumberSuggestionsParams) ([]SearchTrainsByModelNumberSuggestionsRow, error)
+	SearchTrainsByNameSuggestions(ctx context.Context, arg SearchTrainsByNameSuggestionsParams) ([]SearchTrainsByNameSuggestionsRow, error)
 	UpdateCollectionTrain(ctx context.Context, arg UpdateCollectionTrainParams) (CollectionTrain, error)
 	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) (User, error)
 	// IN FUTURE WHEN UPGRADE TO PGX

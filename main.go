@@ -68,9 +68,9 @@ func runDBMigration(migrationURL string, dbSource string) {
 }
 
 func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
-	file, err := os.Open("./trains/train_data.csv")
+	file, err := os.Open("./trains/final_merge.csv")
 	if err != nil {
-		log.Fatalf("Cannot open '%s': %s\n", "./trains/train_data.csv", err.Error())
+		log.Fatalf("Cannot open '%s': %s\n", "./trains/final_merge.csv", err.Error())
 	}
 	defer file.Close()
 
@@ -79,7 +79,7 @@ func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
 
 	lines, err := r.ReadAll()
 	if err != nil {
-		log.Fatalf("Cannot read '%s': %s\n", "./trains/train_data.csv", err.Error())
+		log.Fatalf("Cannot read '%s': %s\n", "./trains/final_merge.csv.csv", err.Error())
 	}
 
 	//For train csv with no images
@@ -96,17 +96,23 @@ func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
 	// }
 
 	//For csv that contains trains with image links
+	i := 0
+
 	for _, line := range lines {
+		i += 1
 		arg := db.CreateImageTrainParams{
 			ModelNumber: line[1],
 			Name:        line[2],
 		}
-
-		if len(line) < 4 {
-			log.Printf("Warning: Incomplete data in row: %v\n", line)
-			arg.ImgUrl = "" // Setting ImgUrl to empty string
+		if len(line) < 5 {
+			if len(line) < 4 {
+				log.Printf("Warning: Incomplete data in row: %v\n", line)
+				arg.ImgUrl = "" // Setting ImgUrl to empty string
+			} else {
+				arg.ImgUrl = line[3]
+			}
 		} else {
-			arg.ImgUrl = line[3]
+			arg.ImgUrl = line[4]
 		}
 
 		_, err := server.Store.CreateImageTrain(ctx, arg)
@@ -114,5 +120,5 @@ func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
 			log.Fatalf("Cannot create train: %s\n", err.Error())
 		}
 	}
-
+	log.Printf("%v trains created:", i)
 }

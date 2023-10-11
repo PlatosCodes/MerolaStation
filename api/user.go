@@ -72,7 +72,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	log.Println("register result: ", registerResult)
+
 	activationToken, activationPayload, err := server.tokenMaker.CreateToken(
 		registerResult.User.ID,
 		registerResult.User.Username,

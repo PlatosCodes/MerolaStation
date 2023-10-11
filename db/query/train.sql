@@ -74,3 +74,10 @@ ORDER BY model_number
 LIMIT $2
 OFFSET $3;
 
+-- name: SearchTrainsByNameSuggestions :many
+SELECT DISTINCT id, model_number, name
+FROM trains
+WHERE name ILIKE $1 || '%'
+ORDER BY name
+LIMIT $2
+OFFSET $3;
