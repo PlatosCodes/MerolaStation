@@ -99,7 +99,6 @@ func (server *Server) createUser(ctx *gin.Context) {
 		"userID":          activationPayload.UserID,
 		"username":        registerResult.User.Username,
 	}
-	log.Println("dbs ", registerResult)
 
 	// can make async later
 	err = server.mailer.Send(registerResult.User.Email, "user_welcome.tmpl", dbs)
@@ -109,8 +108,6 @@ func (server *Server) createUser(ctx *gin.Context) {
 	}
 
 	rsp := newUserResponse(registerResult.User)
-
-	log.Println("rsp: ", rsp)
 
 	ctx.JSON(http.StatusOK, rsp)
 }

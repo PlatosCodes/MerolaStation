@@ -19,7 +19,8 @@ func newTestServer(t *testing.T, store db.Store) *Server {
 		AccessTokenDuration: time.Minute,
 	}
 
-	server, err := NewServer(config, store, mailer.New(config.Host, config.Port, config.Sender))
+	server, err := NewServer(config, store, mailer.New(config.SmtpHost, config.SmtpPort, config.SmtpUsername,
+		config.SmtpPassword, config.SmtpSender))
 	require.NoError(t, err)
 
 	return server

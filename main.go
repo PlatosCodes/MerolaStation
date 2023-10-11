@@ -31,7 +31,11 @@ func main() {
 	runDBMigration(config.MigrationURL, config.DBSource)
 
 	store := db.NewStore(conn)
-	server, err := api.NewServer(config, store, mailer.New(config.Host, config.Port, config.Sender))
+	server, err := api.NewServer(
+		config,
+		store,
+		mailer.New(config.SmtpHost, config.SmtpPort, config.SmtpUsername,
+			config.SmtpPassword, config.SmtpSender))
 	if err != nil {
 		log.Fatal("cannot create server")
 	}

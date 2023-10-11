@@ -23,8 +23,8 @@ type Mailer struct {
 	sender string
 }
 
-func New(host string, port int, sender string) *Mailer {
-	dialer := mail.NewDialer(host, port, "codingplato@gmail.com", "ugjmdfngrbtpjjsp")
+func New(host string, port int, name string, password string, sender string) *Mailer {
+	dialer := mail.NewDialer(host, port, name, password)
 	dialer.Timeout = 5 * time.Second
 	return &Mailer{
 
