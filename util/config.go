@@ -6,6 +6,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+type Smtp struct {
+	Host     string `mapstructure:"smtpHost"`
+	Port     int    `mapstructure:"smtpPort"`
+	Username string `mapstructure:"smtpUsername"`
+	Password string `mapstructure:"smtpPassword"`
+	Sender   string `mapstructure:"smtpSender"`
+}
+
 // TODO: Look into changing TokenSymmetricKey to Asymmetric in production.
 type Config struct {
 	DBDriver             string        `mapstructure:"DB_DRIVER"`
@@ -15,6 +23,11 @@ type Config struct {
 	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+	Host                 string        `mapstructure:"smtpHost"`
+	Port                 int           `mapstructure:"smtpPort"`
+	Username             string        `mapstructure:"smtpUsername"`
+	Password             string        `mapstructure:"smtpPassword"`
+	Sender               string        `mapstructure:"smtpSender"`
 }
 
 // LoadConfig reads configuration from file or environment variables.

@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -71,8 +72,45 @@ func (server *Server) createUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+	log.Println("register result: ", registerResult)
+	activationToken, activationPayload, err := server.tokenMaker.CreateToken(
+		registerResult.User.ID,
+		registerResult.User.Username,
+		server.config.RefreshTokenDuration*7,
+	)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	activationInfo, err := server.Store.InsertActivationToken(ctx, db.InsertActivationTokenParams{
+		UserID:          registerResult.User.ID,
+		ActivationToken: activationToken,
+		ExpiresAt:       activationPayload.ExpiresAt.Time,
+	})
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	dbs := map[string]interface{}{
+		"activationToken": activationInfo.ActivationToken,
+		"userID":          activationPayload.UserID,
+		"username":        registerResult.User.Username,
+	}
+	log.Println("dbs ", registerResult)
+
+	// can make async later
+	err = server.mailer.Send(registerResult.User.Email, "user_welcome.tmpl", dbs)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
 
 	rsp := newUserResponse(registerResult.User)
+
+	log.Println("rsp: ", rsp)
 
 	ctx.JSON(http.StatusOK, rsp)
 }
@@ -122,6 +160,51 @@ func (server *Server) getUser(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, rsp)
+}
+
+type activateUserRequest struct {
+	UserID          int64  `json:"user_id" binding:"required"`
+	ActivationToken string `json:"activation_token" binding:"required"`
+}
+
+func (server *Server) activateUser(ctx *gin.Context) {
+	var req activateUserRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Println(1, "req:", req)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	_, err := server.tokenMaker.VerifyToken(req.ActivationToken)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	storedToken, err := server.Store.GetActivationToken(ctx, req.ActivationToken)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
+
+	if storedToken.UserID == req.UserID {
+		err = server.Store.ActivateUser(ctx, storedToken.UserID)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+	}
+
+	err = server.Store.DeleteActivationToken(ctx, storedToken.UserID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, "User successfully activated.")
 }
 
 type listUserRequest struct {
@@ -208,6 +291,12 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	err = util.CheckPassword(req.Password, user.HashedPassword)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	if !user.Activated {
+		ctx.JSON(http.StatusUnauthorized, "Please use the link that was sent to your email in order to activate your account.")
+		log.Println("yoho")
 		return
 	}
 

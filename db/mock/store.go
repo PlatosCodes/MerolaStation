@@ -36,6 +36,20 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
+// ActivateUser mocks base method.
+func (m *MockStore) ActivateUser(arg0 context.Context, arg1 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ActivateUser", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ActivateUser indicates an expected call of ActivateUser.
+func (mr *MockStoreMockRecorder) ActivateUser(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ActivateUser", reflect.TypeOf((*MockStore)(nil).ActivateUser), arg0, arg1)
+}
+
 // BlockSession mocks base method.
 func (m *MockStore) BlockSession(arg0 context.Context, arg1 uuid.UUID) error {
 	m.ctrl.T.Helper()
@@ -63,6 +77,21 @@ func (m *MockStore) CreateCollectionTrain(arg0 context.Context, arg1 db.CreateCo
 func (mr *MockStoreMockRecorder) CreateCollectionTrain(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCollectionTrain", reflect.TypeOf((*MockStore)(nil).CreateCollectionTrain), arg0, arg1)
+}
+
+// CreateImageTrain mocks base method.
+func (m *MockStore) CreateImageTrain(arg0 context.Context, arg1 db.CreateImageTrainParams) (db.Train, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateImageTrain", arg0, arg1)
+	ret0, _ := ret[0].(db.Train)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateImageTrain indicates an expected call of CreateImageTrain.
+func (mr *MockStoreMockRecorder) CreateImageTrain(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateImageTrain", reflect.TypeOf((*MockStore)(nil).CreateImageTrain), arg0, arg1)
 }
 
 // CreateSession mocks base method.
@@ -155,6 +184,20 @@ func (mr *MockStoreMockRecorder) CreateWishlistTrain(arg0, arg1 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWishlistTrain", reflect.TypeOf((*MockStore)(nil).CreateWishlistTrain), arg0, arg1)
 }
 
+// DeleteActivationToken mocks base method.
+func (m *MockStore) DeleteActivationToken(arg0 context.Context, arg1 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteActivationToken", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteActivationToken indicates an expected call of DeleteActivationToken.
+func (mr *MockStoreMockRecorder) DeleteActivationToken(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteActivationToken", reflect.TypeOf((*MockStore)(nil).DeleteActivationToken), arg0, arg1)
+}
+
 // DeleteCollectionTrain mocks base method.
 func (m *MockStore) DeleteCollectionTrain(arg0 context.Context, arg1 db.DeleteCollectionTrainParams) error {
 	m.ctrl.T.Helper()
@@ -237,6 +280,21 @@ func (m *MockStore) DeleteWishlistTrain(arg0 context.Context, arg1 db.DeleteWish
 func (mr *MockStoreMockRecorder) DeleteWishlistTrain(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteWishlistTrain", reflect.TypeOf((*MockStore)(nil).DeleteWishlistTrain), arg0, arg1)
+}
+
+// GetActivationToken mocks base method.
+func (m *MockStore) GetActivationToken(arg0 context.Context, arg1 string) (db.ActivationToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetActivationToken", arg0, arg1)
+	ret0, _ := ret[0].(db.ActivationToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetActivationToken indicates an expected call of GetActivationToken.
+func (mr *MockStoreMockRecorder) GetActivationToken(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActivationToken", reflect.TypeOf((*MockStore)(nil).GetActivationToken), arg0, arg1)
 }
 
 // GetCollectionTrain mocks base method.
@@ -492,6 +550,21 @@ func (m *MockStore) GetWishlistTrain(arg0 context.Context, arg1 db.GetWishlistTr
 func (mr *MockStoreMockRecorder) GetWishlistTrain(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWishlistTrain", reflect.TypeOf((*MockStore)(nil).GetWishlistTrain), arg0, arg1)
+}
+
+// InsertActivationToken mocks base method.
+func (m *MockStore) InsertActivationToken(arg0 context.Context, arg1 db.InsertActivationTokenParams) (db.ActivationToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertActivationToken", arg0, arg1)
+	ret0, _ := ret[0].(db.ActivationToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InsertActivationToken indicates an expected call of InsertActivationToken.
+func (mr *MockStoreMockRecorder) InsertActivationToken(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertActivationToken", reflect.TypeOf((*MockStore)(nil).InsertActivationToken), arg0, arg1)
 }
 
 // ListAllUserTradeOffers mocks base method.
@@ -792,6 +865,20 @@ func (m *MockStore) UpdatePassword(arg0 context.Context, arg1 db.UpdatePasswordP
 func (mr *MockStoreMockRecorder) UpdatePassword(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePassword", reflect.TypeOf((*MockStore)(nil).UpdatePassword), arg0, arg1)
+}
+
+// UpdateTrainImageUrl mocks base method.
+func (m *MockStore) UpdateTrainImageUrl(arg0 context.Context, arg1 db.UpdateTrainImageUrlParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateTrainImageUrl", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateTrainImageUrl indicates an expected call of UpdateTrainImageUrl.
+func (mr *MockStoreMockRecorder) UpdateTrainImageUrl(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTrainImageUrl", reflect.TypeOf((*MockStore)(nil).UpdateTrainImageUrl), arg0, arg1)
 }
 
 // UpdateTrainValue mocks base method.

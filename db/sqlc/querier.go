@@ -11,20 +11,24 @@ import (
 )
 
 type Querier interface {
+	ActivateUser(ctx context.Context, id int64) error
 	BlockSession(ctx context.Context, id uuid.UUID) error
 	CreateCollectionTrain(ctx context.Context, arg CreateCollectionTrainParams) (CollectionTrain, error)
+	CreateImageTrain(ctx context.Context, arg CreateImageTrainParams) (Train, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateTradeOffer(ctx context.Context, arg CreateTradeOfferParams) (TradeOffer, error)
 	CreateTradeTransaction(ctx context.Context, arg CreateTradeTransactionParams) (TradeTransaction, error)
 	CreateTrain(ctx context.Context, arg CreateTrainParams) (Train, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateWishlistTrain(ctx context.Context, arg CreateWishlistTrainParams) (WishlistTrain, error)
+	DeleteActivationToken(ctx context.Context, userID int64) error
 	DeleteCollectionTrain(ctx context.Context, arg DeleteCollectionTrainParams) error
 	DeleteTradeOffer(ctx context.Context, id int64) error
 	DeleteTradeTransaction(ctx context.Context, id int64) error
 	DeleteTrain(ctx context.Context, id int64) error
 	DeleteUser(ctx context.Context, id int64) error
 	DeleteWishlistTrain(ctx context.Context, arg DeleteWishlistTrainParams) error
+	GetActivationToken(ctx context.Context, activationToken string) (ActivationToken, error)
 	GetCollectionTrain(ctx context.Context, arg GetCollectionTrainParams) (CollectionTrain, error)
 	GetCollectionTrainByID(ctx context.Context, id int64) (CollectionTrain, error)
 	GetCollectionTrainforUpdate(ctx context.Context, arg GetCollectionTrainforUpdateParams) (CollectionTrain, error)
@@ -42,6 +46,7 @@ type Querier interface {
 	GetUserCollectionWithWishlistStatus(ctx context.Context, userID int64) ([]GetUserCollectionWithWishlistStatusRow, error)
 	GetUserWishlistWithCollectionStatus(ctx context.Context, userID int64) ([]GetUserWishlistWithCollectionStatusRow, error)
 	GetWishlistTrain(ctx context.Context, arg GetWishlistTrainParams) (WishlistTrain, error)
+	InsertActivationToken(ctx context.Context, arg InsertActivationTokenParams) (ActivationToken, error)
 	ListAllUserTradeOffers(ctx context.Context, arg ListAllUserTradeOffersParams) ([]TradeOffer, error)
 	ListCollectionTrainTradeOffers(ctx context.Context, arg ListCollectionTrainTradeOffersParams) (TradeOffer, error)
 	ListCollectionTrains(ctx context.Context, arg ListCollectionTrainsParams) ([]CollectionTrain, error)
@@ -60,6 +65,7 @@ type Querier interface {
 	SearchTrainsByModelNumberSuggestions(ctx context.Context, arg SearchTrainsByModelNumberSuggestionsParams) ([]SearchTrainsByModelNumberSuggestionsRow, error)
 	UpdateCollectionTrain(ctx context.Context, arg UpdateCollectionTrainParams) (CollectionTrain, error)
 	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) (User, error)
+	UpdateTrainImageUrl(ctx context.Context, arg UpdateTrainImageUrlParams) error
 	UpdateTrainValue(ctx context.Context, arg UpdateTrainValueParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }

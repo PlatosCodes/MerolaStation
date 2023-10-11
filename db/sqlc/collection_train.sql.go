@@ -273,7 +273,7 @@ func (q *Queries) ListUserCollection(ctx context.Context, arg ListUserCollection
 
 const listUserTrains = `-- name: ListUserTrains :many
 SELECT 
-    trains.id, trains.model_number, trains.name, trains.value, trains.created_at, trains.version, trains.last_edited_at, 
+    trains.id, trains.model_number, trains.name, trains.value, trains.img_url, trains.created_at, trains.version, trains.last_edited_at, 
     CASE WHEN collection_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_collection,
     CASE WHEN wishlist_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_wishlist
 FROM 
@@ -299,6 +299,7 @@ type ListUserTrainsRow struct {
 	ModelNumber    string    `json:"model_number"`
 	Name           string    `json:"name"`
 	Value          int64     `json:"value"`
+	ImgUrl         string    `json:"img_url"`
 	CreatedAt      time.Time `json:"created_at"`
 	Version        int64     `json:"version"`
 	LastEditedAt   time.Time `json:"last_edited_at"`
@@ -320,6 +321,7 @@ func (q *Queries) ListUserTrains(ctx context.Context, arg ListUserTrainsParams) 
 			&i.ModelNumber,
 			&i.Name,
 			&i.Value,
+			&i.ImgUrl,
 			&i.CreatedAt,
 			&i.Version,
 			&i.LastEditedAt,

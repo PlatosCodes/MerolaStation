@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
+	"github.com/PlatosCodes/MerolaStation/mailer"
 	"github.com/PlatosCodes/MerolaStation/token"
 	"github.com/PlatosCodes/MerolaStation/util"
 	"github.com/gin-contrib/cors"
@@ -15,10 +16,11 @@ type Server struct {
 	config     util.Config
 	Store      db.Store
 	tokenMaker token.Maker
+	mailer     *mailer.Mailer
 	router     *gin.Engine
 }
 
-func NewServer(config util.Config, store db.Store) (*Server, error) {
+func NewServer(config util.Config, store db.Store, mailer *mailer.Mailer) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
@@ -27,6 +29,7 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 		config:     config,
 		Store:      store,
 		tokenMaker: tokenMaker,
+		mailer:     mailer,
 	}
 
 	server.setupRouter()
@@ -47,6 +50,8 @@ func (server *Server) setupRouter() {
 	router.Use(cors.New(config))
 
 	router.POST("/users", server.createUser)
+	router.POST("/activate", server.activateUser)
+
 	router.POST("/users/login", server.loginUser)
 	router.POST("/renew_access", server.RenewAccessToken)
 	router.GET("/check_session", server.CheckUserSession)

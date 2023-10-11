@@ -11,13 +11,45 @@ import (
 	"time"
 )
 
+const createImageTrain = `-- name: CreateImageTrain :one
+INSERT INTO trains (
+  model_number,
+  name,
+  img_url
+) VALUES (
+  $1, $2, $3
+) RETURNING id, model_number, name, value, img_url, created_at, version, last_edited_at
+`
+
+type CreateImageTrainParams struct {
+	ModelNumber string `json:"model_number"`
+	Name        string `json:"name"`
+	ImgUrl      string `json:"img_url"`
+}
+
+func (q *Queries) CreateImageTrain(ctx context.Context, arg CreateImageTrainParams) (Train, error) {
+	row := q.db.QueryRowContext(ctx, createImageTrain, arg.ModelNumber, arg.Name, arg.ImgUrl)
+	var i Train
+	err := row.Scan(
+		&i.ID,
+		&i.ModelNumber,
+		&i.Name,
+		&i.Value,
+		&i.ImgUrl,
+		&i.CreatedAt,
+		&i.Version,
+		&i.LastEditedAt,
+	)
+	return i, err
+}
+
 const createTrain = `-- name: CreateTrain :one
 INSERT INTO trains (
   model_number,
   name
 ) VALUES (
   $1, $2
-) RETURNING id, model_number, name, value, created_at, version, last_edited_at
+) RETURNING id, model_number, name, value, img_url, created_at, version, last_edited_at
 `
 
 type CreateTrainParams struct {
@@ -33,6 +65,7 @@ func (q *Queries) CreateTrain(ctx context.Context, arg CreateTrainParams) (Train
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
+		&i.ImgUrl,
 		&i.CreatedAt,
 		&i.Version,
 		&i.LastEditedAt,
@@ -61,7 +94,7 @@ func (q *Queries) GetTotalTrainCount(ctx context.Context) (int64, error) {
 }
 
 const getTrain = `-- name: GetTrain :one
-SELECT id, model_number, name, value, created_at, version, last_edited_at FROM trains
+SELECT id, model_number, name, value, img_url, created_at, version, last_edited_at FROM trains
 WHERE id = $1 LIMIT 1
 `
 
@@ -73,6 +106,7 @@ func (q *Queries) GetTrain(ctx context.Context, id int64) (Train, error) {
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
+		&i.ImgUrl,
 		&i.CreatedAt,
 		&i.Version,
 		&i.LastEditedAt,
@@ -81,7 +115,7 @@ func (q *Queries) GetTrain(ctx context.Context, id int64) (Train, error) {
 }
 
 const getTrainByModel = `-- name: GetTrainByModel :one
-SELECT id, model_number, name, value, created_at, version, last_edited_at FROM trains
+SELECT id, model_number, name, value, img_url, created_at, version, last_edited_at FROM trains
 WHERE model_number = $1 LIMIT 1
 `
 
@@ -93,6 +127,7 @@ func (q *Queries) GetTrainByModel(ctx context.Context, modelNumber string) (Trai
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
+		&i.ImgUrl,
 		&i.CreatedAt,
 		&i.Version,
 		&i.LastEditedAt,
@@ -101,7 +136,7 @@ func (q *Queries) GetTrainByModel(ctx context.Context, modelNumber string) (Trai
 }
 
 const getTrainByName = `-- name: GetTrainByName :one
-SELECT id, model_number, name, value, created_at, version, last_edited_at FROM trains
+SELECT id, model_number, name, value, img_url, created_at, version, last_edited_at FROM trains
 WHERE name = $1 LIMIT 1
 `
 
@@ -113,6 +148,7 @@ func (q *Queries) GetTrainByName(ctx context.Context, name string) (Train, error
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
+		&i.ImgUrl,
 		&i.CreatedAt,
 		&i.Version,
 		&i.LastEditedAt,
@@ -122,7 +158,7 @@ func (q *Queries) GetTrainByName(ctx context.Context, name string) (Train, error
 
 const getTrainDetail = `-- name: GetTrainDetail :one
 SELECT 
-    trains.id, trains.model_number, trains.name, trains.value, trains.created_at, trains.version, trains.last_edited_at,
+    trains.id, trains.model_number, trains.name, trains.value, trains.img_url, trains.created_at, trains.version, trains.last_edited_at,
     CASE WHEN collection_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_collection,
     CASE WHEN wishlist_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_wishlist
 FROM 
@@ -146,6 +182,7 @@ type GetTrainDetailRow struct {
 	ModelNumber    string    `json:"model_number"`
 	Name           string    `json:"name"`
 	Value          int64     `json:"value"`
+	ImgUrl         string    `json:"img_url"`
 	CreatedAt      time.Time `json:"created_at"`
 	Version        int64     `json:"version"`
 	LastEditedAt   time.Time `json:"last_edited_at"`
@@ -161,6 +198,7 @@ func (q *Queries) GetTrainDetail(ctx context.Context, arg GetTrainDetailParams) 
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
+		&i.ImgUrl,
 		&i.CreatedAt,
 		&i.Version,
 		&i.LastEditedAt,
@@ -171,7 +209,7 @@ func (q *Queries) GetTrainDetail(ctx context.Context, arg GetTrainDetailParams) 
 }
 
 const listTrains = `-- name: ListTrains :many
-SELECT id, model_number, name, value, created_at, version, last_edited_at FROM trains
+SELECT id, model_number, name, value, img_url, created_at, version, last_edited_at FROM trains
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -196,6 +234,7 @@ func (q *Queries) ListTrains(ctx context.Context, arg ListTrainsParams) ([]Train
 			&i.ModelNumber,
 			&i.Name,
 			&i.Value,
+			&i.ImgUrl,
 			&i.CreatedAt,
 			&i.Version,
 			&i.LastEditedAt,
@@ -255,6 +294,21 @@ func (q *Queries) SearchTrainsByModelNumberSuggestions(ctx context.Context, arg 
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateTrainImageUrl = `-- name: UpdateTrainImageUrl :exec
+UPDATE trains SET img_url = $2, version = version + 1
+WHERE id = $1
+`
+
+type UpdateTrainImageUrlParams struct {
+	ID     int64  `json:"id"`
+	ImgUrl string `json:"img_url"`
+}
+
+func (q *Queries) UpdateTrainImageUrl(ctx context.Context, arg UpdateTrainImageUrlParams) error {
+	_, err := q.db.ExecContext(ctx, updateTrainImageUrl, arg.ID, arg.ImgUrl)
+	return err
 }
 
 const updateTrainValue = `-- name: UpdateTrainValue :exec

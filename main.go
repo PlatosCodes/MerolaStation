@@ -8,6 +8,7 @@ import (
 
 	"github.com/PlatosCodes/MerolaStation/api"
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
+	"github.com/PlatosCodes/MerolaStation/mailer"
 	"github.com/PlatosCodes/MerolaStation/util"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
@@ -30,7 +31,7 @@ func main() {
 	runDBMigration(config.MigrationURL, config.DBSource)
 
 	store := db.NewStore(conn)
-	server, err := api.NewServer(config, store)
+	server, err := api.NewServer(config, store, mailer.New(config.Host, config.Port, config.Sender))
 	if err != nil {
 		log.Fatal("cannot create server")
 	}
@@ -63,9 +64,9 @@ func runDBMigration(migrationURL string, dbSource string) {
 }
 
 func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
-	file, err := os.Open("train_data.csv")
+	file, err := os.Open("./trains/train_data.csv")
 	if err != nil {
-		log.Fatalf("Cannot open '%s': %s\n", "train_data.csv", err.Error())
+		log.Fatalf("Cannot open '%s': %s\n", "./trains/train_data.csv", err.Error())
 	}
 	defer file.Close()
 
@@ -74,18 +75,40 @@ func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
 
 	lines, err := r.ReadAll()
 	if err != nil {
-		log.Fatalf("Cannot read '%s': %s\n", "train_data.csv", err.Error())
+		log.Fatalf("Cannot read '%s': %s\n", "./trains/train_data.csv", err.Error())
 	}
 
+	//For train csv with no images
+	// for _, line := range lines {
+	// 	arg := db.CreateTrainParams{
+	// 		ModelNumber: line[1],
+	// 		Name:        line[2],
+	// 	}
+
+	// 	_, err := server.Store.CreateTrain(ctx, arg)
+	// 	if err != nil {
+	// 		log.Fatalf("Cannot create train: %s\n", err.Error())
+	// 	}
+	// }
+
+	//For csv that contains trains with image links
 	for _, line := range lines {
-		arg := db.CreateTrainParams{
+		arg := db.CreateImageTrainParams{
 			ModelNumber: line[1],
 			Name:        line[2],
 		}
 
-		_, err := server.Store.CreateTrain(ctx, arg)
+		if len(line) < 4 {
+			log.Printf("Warning: Incomplete data in row: %v\n", line)
+			arg.ImgUrl = "" // Setting ImgUrl to empty string
+		} else {
+			arg.ImgUrl = line[3]
+		}
+
+		_, err := server.Store.CreateImageTrain(ctx, arg)
 		if err != nil {
 			log.Fatalf("Cannot create train: %s\n", err.Error())
 		}
 	}
+
 }

@@ -6,6 +6,15 @@ INSERT INTO trains (
   $1, $2
 ) RETURNING *;
 
+ -- name: CreateImageTrain :one
+INSERT INTO trains (
+  model_number,
+  name,
+  img_url
+) VALUES (
+  $1, $2, $3
+) RETURNING *;
+
 -- name: GetTrain :one
 SELECT * FROM trains
 WHERE id = $1 LIMIT 1;
@@ -44,6 +53,10 @@ SELECT COUNT(*) FROM trains;
 
 -- name: UpdateTrainValue :exec
 UPDATE trains SET value = $2, version = version + 1
+WHERE id = $1;
+
+-- name: UpdateTrainImageUrl :exec
+UPDATE trains SET img_url = $2, version = version + 1
 WHERE id = $1;
 
 -- name: DeleteTrain :exec
