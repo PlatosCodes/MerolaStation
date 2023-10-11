@@ -256,6 +256,38 @@ func (server *Server) listUserTrains(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, trains)
 }
 
+type updateTrainValuesBatchRequest struct {
+	Updates []struct {
+		ID    int64 `json:"id" binding:"required,min=1"`
+		Value int64 `json:"value" binding:"required,min=1"`
+	} `json:"updates" binding:"required,dive"`
+}
+
+func (server *Server) updateTrainsValuesBatch(ctx *gin.Context) {
+	var req updateTrainValuesBatchRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	_ = ctx.MustGet(authorizationPayloadKey).(*token.Payload).UserID
+
+	ids := make([]int64, len(req.Updates))
+	values := make([]int64, len(req.Updates))
+	for i, update := range req.Updates {
+		ids[i] = update.ID
+		values[i] = update.Value
+	}
+
+	err := server.Store.UpdateTrainsValuesBatch(ctx, ids, values)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, req)
+}
+
 type searchTrainByModelNumberSuggestionRequest struct {
 	ModelNumber string `form:"model_number" binding:"required" default:""`
 	PageSize    int    `form:"page_size" binding:"required" default:"10"`

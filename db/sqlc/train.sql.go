@@ -297,6 +297,7 @@ func (q *Queries) SearchTrainsByModelNumberSuggestions(ctx context.Context, arg 
 }
 
 const updateTrainImageUrl = `-- name: UpdateTrainImageUrl :exec
+
 UPDATE trains SET img_url = $2, version = version + 1
 WHERE id = $1
 `
@@ -306,6 +307,9 @@ type UpdateTrainImageUrlParams struct {
 	ImgUrl string `json:"img_url"`
 }
 
+// IN FUTURE WHEN UPGRADE TO PGX
+// -- name: UpdateTrainsBatch :batchexec
+// UPDATE trains SET value = $2 WHERE id = $1;
 func (q *Queries) UpdateTrainImageUrl(ctx context.Context, arg UpdateTrainImageUrlParams) error {
 	_, err := q.db.ExecContext(ctx, updateTrainImageUrl, arg.ID, arg.ImgUrl)
 	return err

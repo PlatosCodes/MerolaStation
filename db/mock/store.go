@@ -895,6 +895,20 @@ func (mr *MockStoreMockRecorder) UpdateTrainValue(arg0, arg1 interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTrainValue", reflect.TypeOf((*MockStore)(nil).UpdateTrainValue), arg0, arg1)
 }
 
+// UpdateTrainsValuesBatch mocks base method.
+func (m *MockStore) UpdateTrainsValuesBatch(arg0 context.Context, arg1, arg2 []int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateTrainsValuesBatch", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateTrainsValuesBatch indicates an expected call of UpdateTrainsValuesBatch.
+func (mr *MockStoreMockRecorder) UpdateTrainsValuesBatch(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTrainsValuesBatch", reflect.TypeOf((*MockStore)(nil).UpdateTrainsValuesBatch), arg0, arg1, arg2)
+}
+
 // UpdateUser mocks base method.
 func (m *MockStore) UpdateUser(arg0 context.Context, arg1 db.UpdateUserParams) (db.User, error) {
 	m.ctrl.T.Helper()

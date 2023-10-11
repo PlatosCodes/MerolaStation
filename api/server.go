@@ -76,7 +76,8 @@ func (server *Server) setupRouter() {
 	// authRoutes.GET("/trains", server.listUserTrains)
 	authRoutes.GET("/trains", server.listUserTrainsWithPages)
 
-	authRoutes.PUT("/trains", server.updateTrainValue)
+	authRoutes.PUT("/trains/value", server.updateTrainValue)
+	authRoutes.PUT("/trains/values/batch", server.updateTrainsValuesBatch)
 
 	authRoutes.GET("/users/:id/collection", server.listUserCollection)
 	authRoutes.GET("/users/:id/collection/:train_id", server.getUserCollectionWithWishlistStatus)

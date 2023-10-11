@@ -55,6 +55,10 @@ SELECT COUNT(*) FROM trains;
 UPDATE trains SET value = $2, version = version + 1
 WHERE id = $1;
 
+-- IN FUTURE WHEN UPGRADE TO PGX
+-- -- name: UpdateTrainsBatch :batchexec
+-- UPDATE trains SET value = $2 WHERE id = $1; 
+
 -- name: UpdateTrainImageUrl :exec
 UPDATE trains SET img_url = $2, version = version + 1
 WHERE id = $1;

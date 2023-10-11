@@ -65,6 +65,9 @@ type Querier interface {
 	SearchTrainsByModelNumberSuggestions(ctx context.Context, arg SearchTrainsByModelNumberSuggestionsParams) ([]SearchTrainsByModelNumberSuggestionsRow, error)
 	UpdateCollectionTrain(ctx context.Context, arg UpdateCollectionTrainParams) (CollectionTrain, error)
 	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) (User, error)
+	// IN FUTURE WHEN UPGRADE TO PGX
+	// -- name: UpdateTrainsBatch :batchexec
+	// UPDATE trains SET value = $2 WHERE id = $1;
 	UpdateTrainImageUrl(ctx context.Context, arg UpdateTrainImageUrlParams) error
 	UpdateTrainValue(ctx context.Context, arg UpdateTrainValueParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
