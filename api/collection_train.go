@@ -87,6 +87,7 @@ func (server *Server) listUserCollection(ctx *gin.Context) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
+
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
@@ -99,14 +100,39 @@ func (server *Server) listUserCollection(ctx *gin.Context) {
 				ctx.JSON(http.StatusNotFound, errorResponse(err))
 				return
 			}
+			log.Println("rsp:", err)
 			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 			return
 		}
-		log.Println(train)
 		trains = append(trains, train)
 	}
 
-	ctx.JSON(http.StatusOK, trains)
+	// Fetch total collection value
+	totalValue := int64(0)
+
+	if len(trains) > 0 {
+		totalValue, err = server.Store.GetTotalCollectionValue(context.Background(), authPayload.UserID)
+		if err != nil {
+			log.Println(err)
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+	}
+
+	log.Println(totalValue)
+
+	// Create a new struct for the response which includes both the list of trains and the total collection value
+	type Response struct {
+		Trains     []db.GetTrainDetailRow `json:"trains"`
+		TotalValue int64                  `json:"totalValue"`
+	}
+
+	resp := Response{
+		Trains:     trains,
+		TotalValue: totalValue,
+	}
+
+	ctx.JSON(http.StatusOK, resp)
 }
 
 type getUserCollectionTrainRequest struct {

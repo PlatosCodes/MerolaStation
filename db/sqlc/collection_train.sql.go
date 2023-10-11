@@ -139,6 +139,24 @@ func (q *Queries) GetCollectionTrainforUpdateByID(ctx context.Context, id int64)
 	return i, err
 }
 
+const getTotalCollectionValue = `-- name: GetTotalCollectionValue :one
+SELECT 
+    SUM(trains.value) AS total_value 
+FROM 
+    collection_trains
+JOIN 
+    trains ON trains.id = collection_trains.train_id
+WHERE 
+    collection_trains.user_id = $1
+`
+
+func (q *Queries) GetTotalCollectionValue(ctx context.Context, userID int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getTotalCollectionValue, userID)
+	var total_value int64
+	err := row.Scan(&total_value)
+	return total_value, err
+}
+
 const getUserCollectionWithWishlistStatus = `-- name: GetUserCollectionWithWishlistStatus :many
 SELECT 
     c.id, c.user_id, c.train_id, c.created_at, c.times_traded,

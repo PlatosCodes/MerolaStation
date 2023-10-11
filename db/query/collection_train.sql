@@ -73,3 +73,14 @@ SELECT
 FROM collection_trains c
 LEFT JOIN wishlist_trains w ON c.train_id = w.train_id AND w.user_id = c.user_id
 WHERE c.user_id = $1;
+
+
+-- name: GetTotalCollectionValue :one
+SELECT 
+    SUM(trains.value) AS total_value 
+FROM 
+    collection_trains
+JOIN 
+    trains ON trains.id = collection_trains.train_id
+WHERE 
+    collection_trains.user_id = $1;

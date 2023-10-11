@@ -372,6 +372,21 @@ func (mr *MockStoreMockRecorder) GetSession(arg0, arg1 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSession", reflect.TypeOf((*MockStore)(nil).GetSession), arg0, arg1)
 }
 
+// GetTotalCollectionValue mocks base method.
+func (m *MockStore) GetTotalCollectionValue(arg0 context.Context, arg1 int64) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTotalCollectionValue", arg0, arg1)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTotalCollectionValue indicates an expected call of GetTotalCollectionValue.
+func (mr *MockStoreMockRecorder) GetTotalCollectionValue(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTotalCollectionValue", reflect.TypeOf((*MockStore)(nil).GetTotalCollectionValue), arg0, arg1)
+}
+
 // GetTotalTrainCount mocks base method.
 func (m *MockStore) GetTotalTrainCount(arg0 context.Context) (int64, error) {
 	m.ctrl.T.Helper()
