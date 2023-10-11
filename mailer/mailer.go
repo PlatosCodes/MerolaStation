@@ -68,11 +68,11 @@ func (m Mailer) Send(recipient, templateFile string, data interface{}) error {
 
 	for i := 1; i <= 3; i++ {
 		err = m.dialer.DialAndSend(msg)
-		if err != nil {
-			log.Printf("Error sending email: %v", err)
-			time.Sleep(500 * time.Millisecond)
+		if err == nil {
+			break
 		}
 
+		log.Printf("Error sending email: %v", err)
 		time.Sleep(500 * time.Millisecond)
 	}
 
