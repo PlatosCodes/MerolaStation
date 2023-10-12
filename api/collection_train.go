@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
 
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
@@ -100,7 +99,6 @@ func (server *Server) listUserCollection(ctx *gin.Context) {
 				ctx.JSON(http.StatusNotFound, errorResponse(err))
 				return
 			}
-			log.Println("rsp:", err)
 			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 			return
 		}
@@ -113,13 +111,10 @@ func (server *Server) listUserCollection(ctx *gin.Context) {
 	if len(trains) > 0 {
 		totalValue, err = server.Store.GetTotalCollectionValue(context.Background(), authPayload.UserID)
 		if err != nil {
-			log.Println(err)
 			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 			return
 		}
 	}
-
-	log.Println(totalValue)
 
 	// Create a new struct for the response which includes both the list of trains and the total collection value
 	type Response struct {

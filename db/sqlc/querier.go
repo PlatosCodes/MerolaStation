@@ -6,6 +6,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
@@ -35,6 +36,9 @@ type Querier interface {
 	GetCollectionTrainforUpdateByID(ctx context.Context, id int64) (CollectionTrain, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	GetTotalCollectionValue(ctx context.Context, userID int64) (int64, error)
+	GetTotalSearchSuggestionsByModelNumberTrainCount(ctx context.Context, dollar_1 sql.NullString) (int64, error)
+	GetTotalSearchSuggestionsByNameTrainCount(ctx context.Context, dollar_1 sql.NullString) (int64, error)
+	GetTotalSearchSuggestionsTrainCount(ctx context.Context, arg GetTotalSearchSuggestionsTrainCountParams) (int64, error)
 	GetTotalTrainCount(ctx context.Context) (int64, error)
 	GetTradeOfferByTradeID(ctx context.Context, id int64) (TradeOffer, error)
 	GetTradeTransaction(ctx context.Context, id int64) (TradeTransaction, error)
@@ -63,6 +67,9 @@ type Querier interface {
 	ListUserWishlist(ctx context.Context, arg ListUserWishlistParams) ([]WishlistTrain, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	ListWishlists(ctx context.Context, arg ListWishlistsParams) ([]WishlistTrain, error)
+	SearchTrainSuggestionsByModelNumberWithListStatus(ctx context.Context, arg SearchTrainSuggestionsByModelNumberWithListStatusParams) ([]SearchTrainSuggestionsByModelNumberWithListStatusRow, error)
+	SearchTrainSuggestionsByNameWithListStatus(ctx context.Context, arg SearchTrainSuggestionsByNameWithListStatusParams) ([]SearchTrainSuggestionsByNameWithListStatusRow, error)
+	SearchTrainSuggestionsWithListStatus(ctx context.Context, arg SearchTrainSuggestionsWithListStatusParams) ([]SearchTrainSuggestionsWithListStatusRow, error)
 	SearchTrainsByModelNumberSuggestions(ctx context.Context, arg SearchTrainsByModelNumberSuggestionsParams) ([]SearchTrainsByModelNumberSuggestionsRow, error)
 	SearchTrainsByNameSuggestions(ctx context.Context, arg SearchTrainsByNameSuggestionsParams) ([]SearchTrainsByNameSuggestionsRow, error)
 	UpdateCollectionTrain(ctx context.Context, arg UpdateCollectionTrainParams) (CollectionTrain, error)

@@ -71,6 +71,8 @@ func (server *Server) setupRouter() {
 	authRoutes.GET("/trains/search", server.searchTrainsByModelNumberSuggestions)
 	authRoutes.GET("/trains/search_by_name", server.searchTrainsByNameSuggestions)
 
+	authRoutes.GET("/trains/search_with_status", server.searchTrainSuggestionsWithStatus)
+
 	authRoutes.GET("/trains/all", server.listTrain)
 
 	//Since only logged in users can see, return custom TrainsList for users with wishlist/collection data

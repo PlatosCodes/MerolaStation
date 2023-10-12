@@ -82,20 +82,6 @@ func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
 		log.Fatalf("Cannot read '%s': %s\n", "./trains/final_merge.csv.csv", err.Error())
 	}
 
-	//For train csv with no images
-	// for _, line := range lines {
-	// 	arg := db.CreateTrainParams{
-	// 		ModelNumber: line[1],
-	// 		Name:        line[2],
-	// 	}
-
-	// 	_, err := server.Store.CreateTrain(ctx, arg)
-	// 	if err != nil {
-	// 		log.Fatalf("Cannot create train: %s\n", err.Error())
-	// 	}
-	// }
-
-	//For csv that contains trains with image links
 	i := 0
 
 	for _, line := range lines {
@@ -107,7 +93,7 @@ func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
 		if len(line) < 5 {
 			if len(line) < 4 {
 				log.Printf("Warning: Incomplete data in row: %v\n", line)
-				arg.ImgUrl = "" // Setting ImgUrl to empty string
+				arg.ImgUrl = ""
 			} else {
 				arg.ImgUrl = line[3]
 			}
@@ -122,3 +108,18 @@ func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
 	}
 	log.Printf("%v trains created:", i)
 }
+
+//For train csv with no images
+// for _, line := range lines {
+// 	arg := db.CreateTrainParams{
+// 		ModelNumber: line[1],
+// 		Name:        line[2],
+// 	}
+
+// 	_, err := server.Store.CreateTrain(ctx, arg)
+// 	if err != nil {
+// 		log.Fatalf("Cannot create train: %s\n", err.Error())
+// 	}
+// }
+
+//For csv that contains trains with image links

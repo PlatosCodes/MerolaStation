@@ -3,7 +3,6 @@ package api
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -167,7 +166,6 @@ type activateUserRequest struct {
 func (server *Server) activateUser(ctx *gin.Context) {
 	var req activateUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		log.Println(1, "req:", req)
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
@@ -269,7 +267,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	// Use this if want to send a more generic message in response:
+	// Use this for a more generic error message:
 	// if err := ctx.ShouldBindJSON(&req); err != nil {
 	// 	log.Printf("Error binding login request: %v", err) // Log the detailed error
 	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error. Please try again later."})
@@ -293,7 +291,6 @@ func (server *Server) loginUser(ctx *gin.Context) {
 
 	if !user.Activated {
 		ctx.JSON(http.StatusUnauthorized, "Please use the link that was sent to your email in order to activate your account.")
-		log.Println("yoho")
 		return
 	}
 

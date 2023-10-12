@@ -6,6 +6,7 @@ package mockdb
 
 import (
 	context "context"
+	sql "database/sql"
 	reflect "reflect"
 
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
@@ -385,6 +386,51 @@ func (m *MockStore) GetTotalCollectionValue(arg0 context.Context, arg1 int64) (i
 func (mr *MockStoreMockRecorder) GetTotalCollectionValue(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTotalCollectionValue", reflect.TypeOf((*MockStore)(nil).GetTotalCollectionValue), arg0, arg1)
+}
+
+// GetTotalSearchSuggestionsByModelNumberTrainCount mocks base method.
+func (m *MockStore) GetTotalSearchSuggestionsByModelNumberTrainCount(arg0 context.Context, arg1 sql.NullString) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTotalSearchSuggestionsByModelNumberTrainCount", arg0, arg1)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTotalSearchSuggestionsByModelNumberTrainCount indicates an expected call of GetTotalSearchSuggestionsByModelNumberTrainCount.
+func (mr *MockStoreMockRecorder) GetTotalSearchSuggestionsByModelNumberTrainCount(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTotalSearchSuggestionsByModelNumberTrainCount", reflect.TypeOf((*MockStore)(nil).GetTotalSearchSuggestionsByModelNumberTrainCount), arg0, arg1)
+}
+
+// GetTotalSearchSuggestionsByNameTrainCount mocks base method.
+func (m *MockStore) GetTotalSearchSuggestionsByNameTrainCount(arg0 context.Context, arg1 sql.NullString) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTotalSearchSuggestionsByNameTrainCount", arg0, arg1)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTotalSearchSuggestionsByNameTrainCount indicates an expected call of GetTotalSearchSuggestionsByNameTrainCount.
+func (mr *MockStoreMockRecorder) GetTotalSearchSuggestionsByNameTrainCount(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTotalSearchSuggestionsByNameTrainCount", reflect.TypeOf((*MockStore)(nil).GetTotalSearchSuggestionsByNameTrainCount), arg0, arg1)
+}
+
+// GetTotalSearchSuggestionsTrainCount mocks base method.
+func (m *MockStore) GetTotalSearchSuggestionsTrainCount(arg0 context.Context, arg1 db.GetTotalSearchSuggestionsTrainCountParams) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTotalSearchSuggestionsTrainCount", arg0, arg1)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTotalSearchSuggestionsTrainCount indicates an expected call of GetTotalSearchSuggestionsTrainCount.
+func (mr *MockStoreMockRecorder) GetTotalSearchSuggestionsTrainCount(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTotalSearchSuggestionsTrainCount", reflect.TypeOf((*MockStore)(nil).GetTotalSearchSuggestionsTrainCount), arg0, arg1)
 }
 
 // GetTotalTrainCount mocks base method.
@@ -820,6 +866,51 @@ func (m *MockStore) RegisterTx(arg0 context.Context, arg1 db.CreateUserParams) (
 func (mr *MockStoreMockRecorder) RegisterTx(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterTx", reflect.TypeOf((*MockStore)(nil).RegisterTx), arg0, arg1)
+}
+
+// SearchTrainSuggestionsByModelNumberWithListStatus mocks base method.
+func (m *MockStore) SearchTrainSuggestionsByModelNumberWithListStatus(arg0 context.Context, arg1 db.SearchTrainSuggestionsByModelNumberWithListStatusParams) ([]db.SearchTrainSuggestionsByModelNumberWithListStatusRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchTrainSuggestionsByModelNumberWithListStatus", arg0, arg1)
+	ret0, _ := ret[0].([]db.SearchTrainSuggestionsByModelNumberWithListStatusRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchTrainSuggestionsByModelNumberWithListStatus indicates an expected call of SearchTrainSuggestionsByModelNumberWithListStatus.
+func (mr *MockStoreMockRecorder) SearchTrainSuggestionsByModelNumberWithListStatus(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTrainSuggestionsByModelNumberWithListStatus", reflect.TypeOf((*MockStore)(nil).SearchTrainSuggestionsByModelNumberWithListStatus), arg0, arg1)
+}
+
+// SearchTrainSuggestionsByNameWithListStatus mocks base method.
+func (m *MockStore) SearchTrainSuggestionsByNameWithListStatus(arg0 context.Context, arg1 db.SearchTrainSuggestionsByNameWithListStatusParams) ([]db.SearchTrainSuggestionsByNameWithListStatusRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchTrainSuggestionsByNameWithListStatus", arg0, arg1)
+	ret0, _ := ret[0].([]db.SearchTrainSuggestionsByNameWithListStatusRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchTrainSuggestionsByNameWithListStatus indicates an expected call of SearchTrainSuggestionsByNameWithListStatus.
+func (mr *MockStoreMockRecorder) SearchTrainSuggestionsByNameWithListStatus(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTrainSuggestionsByNameWithListStatus", reflect.TypeOf((*MockStore)(nil).SearchTrainSuggestionsByNameWithListStatus), arg0, arg1)
+}
+
+// SearchTrainSuggestionsWithListStatus mocks base method.
+func (m *MockStore) SearchTrainSuggestionsWithListStatus(arg0 context.Context, arg1 db.SearchTrainSuggestionsWithListStatusParams) ([]db.SearchTrainSuggestionsWithListStatusRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchTrainSuggestionsWithListStatus", arg0, arg1)
+	ret0, _ := ret[0].([]db.SearchTrainSuggestionsWithListStatusRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchTrainSuggestionsWithListStatus indicates an expected call of SearchTrainSuggestionsWithListStatus.
+func (mr *MockStoreMockRecorder) SearchTrainSuggestionsWithListStatus(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTrainSuggestionsWithListStatus", reflect.TypeOf((*MockStore)(nil).SearchTrainSuggestionsWithListStatus), arg0, arg1)
 }
 
 // SearchTrainsByModelNumberSuggestions mocks base method.
