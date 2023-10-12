@@ -17,6 +17,7 @@ CREATE TABLE "trains" (
   "model_number" varchar NOT NULL,
   "name" varchar NOT NULL,
   "value" bigint NOT NULL DEFAULT 0,
+  "img_url" varchar NOT NULL DEFAULT '',
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "version" bigint NOT NULL DEFAULT 1,
   "last_edited_at" timestamptz NOT NULL DEFAULT (now())

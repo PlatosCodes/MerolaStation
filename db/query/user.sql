@@ -7,6 +7,11 @@ INSERT INTO users (
   $1, $2, $3, $4
 ) RETURNING *;
 
+ -- name: ActivateUser :exec
+UPDATE users
+SET activated = true
+WHERE id = $1;
+
 -- name: GetUser :one
 SELECT * FROM users
 WHERE id = $1 LIMIT 1;

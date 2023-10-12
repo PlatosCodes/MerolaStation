@@ -11,6 +11,17 @@ import (
 	"time"
 )
 
+const activateUser = `-- name: ActivateUser :exec
+UPDATE users
+SET activated = true
+WHERE id = $1
+`
+
+func (q *Queries) ActivateUser(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, activateUser, id)
+	return err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
   username,

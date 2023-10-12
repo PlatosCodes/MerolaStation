@@ -10,6 +10,14 @@ import (
 	"github.com/google/uuid"
 )
 
+type ActivationToken struct {
+	UserID          int64     `json:"user_id"`
+	ActivationToken string    `json:"activation_token"`
+	IsBlocked       bool      `json:"is_blocked"`
+	ExpiresAt       time.Time `json:"expires_at"`
+	CreatedAt       time.Time `json:"created_at"`
+}
+
 type CollectionTrain struct {
 	ID          int64     `json:"id"`
 	UserID      int64     `json:"user_id"`
@@ -52,6 +60,7 @@ type Train struct {
 	ModelNumber  string    `json:"model_number"`
 	Name         string    `json:"name"`
 	Value        int64     `json:"value"`
+	ImgUrl       string    `json:"img_url"`
 	CreatedAt    time.Time `json:"created_at"`
 	Version      int64     `json:"version"`
 	LastEditedAt time.Time `json:"last_edited_at"`

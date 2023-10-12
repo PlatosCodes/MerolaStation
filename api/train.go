@@ -2,7 +2,7 @@ package api
 
 import (
 	"database/sql"
-	"log"
+	"fmt"
 	"net/http"
 
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
@@ -90,7 +90,6 @@ func (server *Server) getTrainDetail(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	log.Println(train)
 	ctx.JSON(http.StatusOK, train)
 }
 
@@ -256,6 +255,38 @@ func (server *Server) listUserTrains(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, trains)
 }
 
+type updateTrainValuesBatchRequest struct {
+	Updates []struct {
+		ID    int64 `json:"id" binding:"required,min=1"`
+		Value int64 `json:"value" binding:"required,min=1"`
+	} `json:"updates" binding:"required,dive"`
+}
+
+func (server *Server) updateTrainsValuesBatch(ctx *gin.Context) {
+	var req updateTrainValuesBatchRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	_ = ctx.MustGet(authorizationPayloadKey).(*token.Payload).UserID
+
+	ids := make([]int64, len(req.Updates))
+	values := make([]int64, len(req.Updates))
+	for i, update := range req.Updates {
+		ids[i] = update.ID
+		values[i] = update.Value
+	}
+
+	err := server.Store.UpdateTrainsValuesBatch(ctx, ids, values)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, req)
+}
+
 type searchTrainByModelNumberSuggestionRequest struct {
 	ModelNumber string `form:"model_number" binding:"required" default:""`
 	PageSize    int    `form:"page_size" binding:"required" default:"10"`
@@ -270,7 +301,6 @@ func (server *Server) searchTrainsByModelNumberSuggestions(ctx *gin.Context) {
 
 	var req searchTrainByModelNumberSuggestionRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		log.Printf("Bind error: %v", err)
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
@@ -302,7 +332,123 @@ func (server *Server) searchTrainsByModelNumberSuggestions(ctx *gin.Context) {
 	response := SearchTrainsByModelNumberResponse{
 		Trains: trains,
 	}
-
 	ctx.JSON(http.StatusOK, response)
 
+}
+
+type searchTrainByNameSuggestionRequest struct {
+	Name     string `form:"name" binding:"required"`
+	PageSize int    `form:"page_size" binding:"required" default:"10"`
+	PageID   int    `form:"page_id" binding:"required" default:"1"`
+}
+
+// This can be the same response type as search by model number
+type SearchTrainsByNameResponse struct {
+	Trains []db.SearchTrainsByNameSuggestionsRow `json:"trains"`
+}
+
+func (server *Server) searchTrainsByNameSuggestions(ctx *gin.Context) {
+	var req searchTrainByNameSuggestionRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	limit := int32(req.PageSize)
+
+	namePattern := sql.NullString{
+		String: "%" + req.Name + "%",
+		Valid:  true,
+	}
+
+	searchParams := db.SearchTrainsByNameSuggestionsParams{
+		Column1: namePattern,
+		Limit:   limit,
+		Offset:  int32((req.PageID - 1) * req.PageSize),
+	}
+
+	trains, err := server.Store.SearchTrainsByNameSuggestions(ctx, searchParams)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	response := SearchTrainsByNameResponse{
+		Trains: trains,
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}
+
+type searchTrainSuggestionsWithListStatusRequest struct {
+	SearchType  string `form:"search_type" binding:"required"`
+	SearchTerms string `form:"search_terms" binding:"required" default:""`
+	PageSize    int    `form:"page_size" binding:"required" default:"10"`
+	PageID      int    `form:"page_id" binding:"required" default:"1"`
+}
+
+type searchTrainSuggestionsWithListStatusResponse struct {
+	TotalCount int64                                        `json:"total_count"`
+	Trains     []db.SearchTrainSuggestionsWithListStatusRow `json:"trains"`
+}
+
+func (server *Server) searchTrainSuggestionsWithStatus(ctx *gin.Context) {
+	var req searchTrainSuggestionsWithListStatusRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	userID := ctx.MustGet(authorizationPayloadKey).(*token.Payload).UserID
+	if req.SearchType != "name" && req.SearchType != "model" {
+		ctx.JSON(http.StatusBadRequest, errorResponse(fmt.Errorf("cannot use type of search term: %s", req.SearchType)))
+		return
+	}
+
+	limit := int32(req.PageSize)
+	pattern := sql.NullString{
+		String: req.SearchTerms + "%",
+		Valid:  true,
+	}
+
+	var trains []db.SearchTrainSuggestionsWithListStatusRow
+	var totalCount int64
+	var err error
+
+	searchParams := db.SearchTrainSuggestionsWithListStatusParams{
+		UserID:  userID,
+		Column2: pattern,
+		Limit:   limit,
+		Column4: req.SearchType,
+		Offset:  int32((req.PageID - 1) * req.PageSize),
+	}
+
+	trainCountParams := db.GetTotalSearchSuggestionsTrainCountParams{
+		Column1: req.SearchType,
+		Column2: pattern,
+	}
+
+	trains, err = server.Store.SearchTrainSuggestionsWithListStatus(ctx, searchParams)
+	if err == nil {
+		totalCount, err = server.Store.GetTotalSearchSuggestionsTrainCount(ctx, trainCountParams)
+	}
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		} else {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		}
+		return
+	}
+
+	response := searchTrainSuggestionsWithListStatusResponse{
+		TotalCount: totalCount,
+		Trains:     trains,
+	}
+	ctx.JSON(http.StatusOK, response)
 }
