@@ -153,23 +153,26 @@ func TestGetUserCollectionAPI(t *testing.T) {
 	userID := user.ID
 	username := user.Username
 	collection := randomCollection(userID)
+	collection_value := int64(0)
 	page_id := 1
 	page_size := 1
 
 	testCases := []struct {
-		name          string
-		userID        int64
-		page_id       int
-		page_size     int
-		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
-		buildStubs    func(store *mockdb.MockStore)
-		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
+		name             string
+		userID           int64
+		page_id          int
+		page_size        int
+		collection_value int64
+		setupAuth        func(t *testing.T, request *http.Request, tokenMaker token.Maker)
+		buildStubs       func(store *mockdb.MockStore)
+		checkResponse    func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
-			name:      "OK",
-			userID:    userID,
-			page_id:   page_id,
-			page_size: page_size,
+			name:             "OK",
+			userID:           userID,
+			page_id:          page_id,
+			page_size:        page_size,
+			collection_value: collection_value,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, userID, username, time.Minute)
 			},
@@ -192,10 +195,14 @@ func TestGetUserCollectionAPI(t *testing.T) {
 					Return(collection, nil)
 				for _, train := range collection {
 					store.EXPECT().
-						GetTrain(gomock.Any(), train.TrainID).
+						GetTrainDetail(gomock.Any(), db.GetTrainDetailParams{ID: train.TrainID, UserID: userID}).
 						Times(1).
-						Return(db.Train{}, nil) // or return some mock train data
+						Return(db.GetTrainDetailRow{}, nil) // or return some mock train data
 				}
+				store.EXPECT().
+					GetTotalCollectionValue(gomock.Any(), userID).
+					Times(1).
+					Return(collection_value, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code, "Response body: %s", recorder.Body.String())
@@ -404,9 +411,9 @@ func TestGetUserCollectionAPI(t *testing.T) {
 					Return(collection, nil)
 				for _, train := range collection {
 					store.EXPECT().
-						GetTrain(gomock.Any(), train.TrainID).
+						GetTrainDetail(gomock.Any(), db.GetTrainDetailParams{ID: train.TrainID, UserID: userID}).
 						Times(1).
-						Return(db.Train{}, sql.ErrConnDone) // or return some mock train data
+						Return(db.GetTrainDetailRow{}, sql.ErrConnDone) // or return some mock train data
 				}
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -440,9 +447,9 @@ func TestGetUserCollectionAPI(t *testing.T) {
 					Return(collection, nil)
 				for _, train := range collection {
 					store.EXPECT().
-						GetTrain(gomock.Any(), train.TrainID).
+						GetTrainDetail(gomock.Any(), db.GetTrainDetailParams{ID: train.TrainID, UserID: userID}).
 						Times(1).
-						Return(db.Train{}, sql.ErrNoRows) // or return some mock train data
+						Return(db.GetTrainDetailRow{}, sql.ErrNoRows) // or return some mock train data
 				}
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {

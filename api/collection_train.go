@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
 
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
@@ -87,8 +86,10 @@ func (server *Server) listUserCollection(ctx *gin.Context) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
+		if err == sql.ErrConnDone {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
 	}
 
 	trains := []db.GetTrainDetailRow{}
@@ -99,14 +100,37 @@ func (server *Server) listUserCollection(ctx *gin.Context) {
 				ctx.JSON(http.StatusNotFound, errorResponse(err))
 				return
 			}
-			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-			return
+			if err == sql.ErrConnDone {
+				ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+				return
+			}
 		}
-		log.Println(train)
 		trains = append(trains, train)
 	}
 
-	ctx.JSON(http.StatusOK, trains)
+	// Fetch total collection value
+	totalValue := int64(0)
+
+	if len(trains) > 0 {
+		totalValue, err = server.Store.GetTotalCollectionValue(context.Background(), authPayload.UserID)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+	}
+
+	// Create a new struct for the response which includes both the list of trains and the total collection value
+	type Response struct {
+		Trains     []db.GetTrainDetailRow `json:"trains"`
+		TotalValue int64                  `json:"totalValue"`
+	}
+
+	resp := Response{
+		Trains:     trains,
+		TotalValue: totalValue,
+	}
+
+	ctx.JSON(http.StatusOK, resp)
 }
 
 type getUserCollectionTrainRequest struct {

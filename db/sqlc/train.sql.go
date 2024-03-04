@@ -11,13 +11,45 @@ import (
 	"time"
 )
 
+const createImageTrain = `-- name: CreateImageTrain :one
+INSERT INTO trains (
+  model_number,
+  name,
+  img_url
+) VALUES (
+  $1, $2, $3
+) RETURNING id, model_number, name, value, img_url, created_at, version, last_edited_at
+`
+
+type CreateImageTrainParams struct {
+	ModelNumber string `json:"model_number"`
+	Name        string `json:"name"`
+	ImgUrl      string `json:"img_url"`
+}
+
+func (q *Queries) CreateImageTrain(ctx context.Context, arg CreateImageTrainParams) (Train, error) {
+	row := q.db.QueryRowContext(ctx, createImageTrain, arg.ModelNumber, arg.Name, arg.ImgUrl)
+	var i Train
+	err := row.Scan(
+		&i.ID,
+		&i.ModelNumber,
+		&i.Name,
+		&i.Value,
+		&i.ImgUrl,
+		&i.CreatedAt,
+		&i.Version,
+		&i.LastEditedAt,
+	)
+	return i, err
+}
+
 const createTrain = `-- name: CreateTrain :one
 INSERT INTO trains (
   model_number,
   name
 ) VALUES (
   $1, $2
-) RETURNING id, model_number, name, value, created_at, version, last_edited_at
+) RETURNING id, model_number, name, value, img_url, created_at, version, last_edited_at
 `
 
 type CreateTrainParams struct {
@@ -33,6 +65,7 @@ func (q *Queries) CreateTrain(ctx context.Context, arg CreateTrainParams) (Train
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
+		&i.ImgUrl,
 		&i.CreatedAt,
 		&i.Version,
 		&i.LastEditedAt,
@@ -49,6 +82,51 @@ func (q *Queries) DeleteTrain(ctx context.Context, id int64) error {
 	return err
 }
 
+const getTotalSearchSuggestionsByModelNumberTrainCount = `-- name: GetTotalSearchSuggestionsByModelNumberTrainCount :one
+SELECT COUNT(*)
+FROM trains
+WHERE model_number ILIKE $1 || '%'
+`
+
+func (q *Queries) GetTotalSearchSuggestionsByModelNumberTrainCount(ctx context.Context, dollar_1 sql.NullString) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getTotalSearchSuggestionsByModelNumberTrainCount, dollar_1)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getTotalSearchSuggestionsByNameTrainCount = `-- name: GetTotalSearchSuggestionsByNameTrainCount :one
+SELECT COUNT(*)
+FROM trains
+WHERE name ILIKE $1 || '%'
+`
+
+func (q *Queries) GetTotalSearchSuggestionsByNameTrainCount(ctx context.Context, dollar_1 sql.NullString) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getTotalSearchSuggestionsByNameTrainCount, dollar_1)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getTotalSearchSuggestionsTrainCount = `-- name: GetTotalSearchSuggestionsTrainCount :one
+SELECT COUNT(*)
+FROM trains
+WHERE 
+CASE WHEN $1 = 'model' THEN model_number ELSE name END ILIKE $2 || '%'
+`
+
+type GetTotalSearchSuggestionsTrainCountParams struct {
+	Column1 interface{}    `json:"column_1"`
+	Column2 sql.NullString `json:"column_2"`
+}
+
+func (q *Queries) GetTotalSearchSuggestionsTrainCount(ctx context.Context, arg GetTotalSearchSuggestionsTrainCountParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getTotalSearchSuggestionsTrainCount, arg.Column1, arg.Column2)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getTotalTrainCount = `-- name: GetTotalTrainCount :one
 SELECT COUNT(*) FROM trains
 `
@@ -61,7 +139,7 @@ func (q *Queries) GetTotalTrainCount(ctx context.Context) (int64, error) {
 }
 
 const getTrain = `-- name: GetTrain :one
-SELECT id, model_number, name, value, created_at, version, last_edited_at FROM trains
+SELECT id, model_number, name, value, img_url, created_at, version, last_edited_at FROM trains
 WHERE id = $1 LIMIT 1
 `
 
@@ -73,6 +151,7 @@ func (q *Queries) GetTrain(ctx context.Context, id int64) (Train, error) {
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
+		&i.ImgUrl,
 		&i.CreatedAt,
 		&i.Version,
 		&i.LastEditedAt,
@@ -81,7 +160,7 @@ func (q *Queries) GetTrain(ctx context.Context, id int64) (Train, error) {
 }
 
 const getTrainByModel = `-- name: GetTrainByModel :one
-SELECT id, model_number, name, value, created_at, version, last_edited_at FROM trains
+SELECT id, model_number, name, value, img_url, created_at, version, last_edited_at FROM trains
 WHERE model_number = $1 LIMIT 1
 `
 
@@ -93,6 +172,7 @@ func (q *Queries) GetTrainByModel(ctx context.Context, modelNumber string) (Trai
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
+		&i.ImgUrl,
 		&i.CreatedAt,
 		&i.Version,
 		&i.LastEditedAt,
@@ -101,7 +181,7 @@ func (q *Queries) GetTrainByModel(ctx context.Context, modelNumber string) (Trai
 }
 
 const getTrainByName = `-- name: GetTrainByName :one
-SELECT id, model_number, name, value, created_at, version, last_edited_at FROM trains
+SELECT id, model_number, name, value, img_url, created_at, version, last_edited_at FROM trains
 WHERE name = $1 LIMIT 1
 `
 
@@ -113,6 +193,7 @@ func (q *Queries) GetTrainByName(ctx context.Context, name string) (Train, error
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
+		&i.ImgUrl,
 		&i.CreatedAt,
 		&i.Version,
 		&i.LastEditedAt,
@@ -122,7 +203,7 @@ func (q *Queries) GetTrainByName(ctx context.Context, name string) (Train, error
 
 const getTrainDetail = `-- name: GetTrainDetail :one
 SELECT 
-    trains.id, trains.model_number, trains.name, trains.value, trains.created_at, trains.version, trains.last_edited_at,
+    trains.id, trains.model_number, trains.name, trains.value, trains.img_url, trains.created_at, trains.version, trains.last_edited_at,
     CASE WHEN collection_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_collection,
     CASE WHEN wishlist_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_wishlist
 FROM 
@@ -146,6 +227,7 @@ type GetTrainDetailRow struct {
 	ModelNumber    string    `json:"model_number"`
 	Name           string    `json:"name"`
 	Value          int64     `json:"value"`
+	ImgUrl         string    `json:"img_url"`
 	CreatedAt      time.Time `json:"created_at"`
 	Version        int64     `json:"version"`
 	LastEditedAt   time.Time `json:"last_edited_at"`
@@ -161,6 +243,7 @@ func (q *Queries) GetTrainDetail(ctx context.Context, arg GetTrainDetailParams) 
 		&i.ModelNumber,
 		&i.Name,
 		&i.Value,
+		&i.ImgUrl,
 		&i.CreatedAt,
 		&i.Version,
 		&i.LastEditedAt,
@@ -171,7 +254,7 @@ func (q *Queries) GetTrainDetail(ctx context.Context, arg GetTrainDetailParams) 
 }
 
 const listTrains = `-- name: ListTrains :many
-SELECT id, model_number, name, value, created_at, version, last_edited_at FROM trains
+SELECT id, model_number, name, value, img_url, created_at, version, last_edited_at FROM trains
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -196,9 +279,242 @@ func (q *Queries) ListTrains(ctx context.Context, arg ListTrainsParams) ([]Train
 			&i.ModelNumber,
 			&i.Name,
 			&i.Value,
+			&i.ImgUrl,
 			&i.CreatedAt,
 			&i.Version,
 			&i.LastEditedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchTrainSuggestionsByModelNumberWithListStatus = `-- name: SearchTrainSuggestionsByModelNumberWithListStatus :many
+SELECT 
+    trains.id, trains.model_number, trains.name, trains.value, trains.img_url, trains.created_at, trains.version, trains.last_edited_at,
+    CASE WHEN collection_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_collection,
+    CASE WHEN wishlist_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_wishlist
+FROM 
+    trains 
+LEFT JOIN 
+    collection_trains ON trains.id = collection_trains.train_id AND collection_trains.user_id = $1
+LEFT JOIN
+    wishlist_trains ON trains.id = wishlist_trains.train_id AND wishlist_trains.user_id = $1
+WHERE model_number ILIKE $2 || '%'
+ORDER BY model_number
+LIMIT $3 
+OFFSET $4
+`
+
+type SearchTrainSuggestionsByModelNumberWithListStatusParams struct {
+	UserID  int64          `json:"user_id"`
+	Column2 sql.NullString `json:"column_2"`
+	Limit   int32          `json:"limit"`
+	Offset  int32          `json:"offset"`
+}
+
+type SearchTrainSuggestionsByModelNumberWithListStatusRow struct {
+	ID             int64     `json:"id"`
+	ModelNumber    string    `json:"model_number"`
+	Name           string    `json:"name"`
+	Value          int64     `json:"value"`
+	ImgUrl         string    `json:"img_url"`
+	CreatedAt      time.Time `json:"created_at"`
+	Version        int64     `json:"version"`
+	LastEditedAt   time.Time `json:"last_edited_at"`
+	IsInCollection bool      `json:"is_in_collection"`
+	IsInWishlist   bool      `json:"is_in_wishlist"`
+}
+
+func (q *Queries) SearchTrainSuggestionsByModelNumberWithListStatus(ctx context.Context, arg SearchTrainSuggestionsByModelNumberWithListStatusParams) ([]SearchTrainSuggestionsByModelNumberWithListStatusRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchTrainSuggestionsByModelNumberWithListStatus,
+		arg.UserID,
+		arg.Column2,
+		arg.Limit,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SearchTrainSuggestionsByModelNumberWithListStatusRow{}
+	for rows.Next() {
+		var i SearchTrainSuggestionsByModelNumberWithListStatusRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ModelNumber,
+			&i.Name,
+			&i.Value,
+			&i.ImgUrl,
+			&i.CreatedAt,
+			&i.Version,
+			&i.LastEditedAt,
+			&i.IsInCollection,
+			&i.IsInWishlist,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchTrainSuggestionsByNameWithListStatus = `-- name: SearchTrainSuggestionsByNameWithListStatus :many
+SELECT 
+    trains.id, trains.model_number, trains.name, trains.value, trains.img_url, trains.created_at, trains.version, trains.last_edited_at,
+    CASE WHEN collection_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_collection,
+    CASE WHEN wishlist_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_wishlist
+FROM 
+    trains 
+LEFT JOIN 
+    collection_trains ON trains.id = collection_trains.train_id AND collection_trains.user_id = $1
+LEFT JOIN
+    wishlist_trains ON trains.id = wishlist_trains.train_id AND wishlist_trains.user_id = $1
+WHERE name ILIKE $2 || '%'
+ORDER BY name
+LIMIT $3 
+OFFSET $4
+`
+
+type SearchTrainSuggestionsByNameWithListStatusParams struct {
+	UserID  int64          `json:"user_id"`
+	Column2 sql.NullString `json:"column_2"`
+	Limit   int32          `json:"limit"`
+	Offset  int32          `json:"offset"`
+}
+
+type SearchTrainSuggestionsByNameWithListStatusRow struct {
+	ID             int64     `json:"id"`
+	ModelNumber    string    `json:"model_number"`
+	Name           string    `json:"name"`
+	Value          int64     `json:"value"`
+	ImgUrl         string    `json:"img_url"`
+	CreatedAt      time.Time `json:"created_at"`
+	Version        int64     `json:"version"`
+	LastEditedAt   time.Time `json:"last_edited_at"`
+	IsInCollection bool      `json:"is_in_collection"`
+	IsInWishlist   bool      `json:"is_in_wishlist"`
+}
+
+func (q *Queries) SearchTrainSuggestionsByNameWithListStatus(ctx context.Context, arg SearchTrainSuggestionsByNameWithListStatusParams) ([]SearchTrainSuggestionsByNameWithListStatusRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchTrainSuggestionsByNameWithListStatus,
+		arg.UserID,
+		arg.Column2,
+		arg.Limit,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SearchTrainSuggestionsByNameWithListStatusRow{}
+	for rows.Next() {
+		var i SearchTrainSuggestionsByNameWithListStatusRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ModelNumber,
+			&i.Name,
+			&i.Value,
+			&i.ImgUrl,
+			&i.CreatedAt,
+			&i.Version,
+			&i.LastEditedAt,
+			&i.IsInCollection,
+			&i.IsInWishlist,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchTrainSuggestionsWithListStatus = `-- name: SearchTrainSuggestionsWithListStatus :many
+SELECT 
+    trains.id, trains.model_number, trains.name, trains.value, trains.img_url, trains.created_at, trains.version, trains.last_edited_at,
+    CASE WHEN collection_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_collection,
+    CASE WHEN wishlist_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_wishlist
+FROM 
+    trains 
+LEFT JOIN 
+    collection_trains ON trains.id = collection_trains.train_id AND collection_trains.user_id = $1
+LEFT JOIN
+    wishlist_trains ON trains.id = wishlist_trains.train_id AND wishlist_trains.user_id = $1
+WHERE 
+    CASE WHEN $4 = 'model' THEN model_number ELSE name END ILIKE $2 || '%'
+ORDER BY 
+    CASE WHEN $4 = 'model' THEN model_number ELSE name END
+LIMIT $3 
+OFFSET $5
+`
+
+type SearchTrainSuggestionsWithListStatusParams struct {
+	UserID  int64          `json:"user_id"`
+	Column2 sql.NullString `json:"column_2"`
+	Limit   int32          `json:"limit"`
+	Column4 interface{}    `json:"column_4"`
+	Offset  int32          `json:"offset"`
+}
+
+type SearchTrainSuggestionsWithListStatusRow struct {
+	ID             int64     `json:"id"`
+	ModelNumber    string    `json:"model_number"`
+	Name           string    `json:"name"`
+	Value          int64     `json:"value"`
+	ImgUrl         string    `json:"img_url"`
+	CreatedAt      time.Time `json:"created_at"`
+	Version        int64     `json:"version"`
+	LastEditedAt   time.Time `json:"last_edited_at"`
+	IsInCollection bool      `json:"is_in_collection"`
+	IsInWishlist   bool      `json:"is_in_wishlist"`
+}
+
+func (q *Queries) SearchTrainSuggestionsWithListStatus(ctx context.Context, arg SearchTrainSuggestionsWithListStatusParams) ([]SearchTrainSuggestionsWithListStatusRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchTrainSuggestionsWithListStatus,
+		arg.UserID,
+		arg.Column2,
+		arg.Limit,
+		arg.Column4,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SearchTrainSuggestionsWithListStatusRow{}
+	for rows.Next() {
+		var i SearchTrainSuggestionsWithListStatusRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ModelNumber,
+			&i.Name,
+			&i.Value,
+			&i.ImgUrl,
+			&i.CreatedAt,
+			&i.Version,
+			&i.LastEditedAt,
+			&i.IsInCollection,
+			&i.IsInWishlist,
 		); err != nil {
 			return nil, err
 		}
@@ -255,6 +571,69 @@ func (q *Queries) SearchTrainsByModelNumberSuggestions(ctx context.Context, arg 
 		return nil, err
 	}
 	return items, nil
+}
+
+const searchTrainsByNameSuggestions = `-- name: SearchTrainsByNameSuggestions :many
+SELECT DISTINCT id, model_number, name
+FROM trains
+WHERE name ILIKE $1 || '%'
+ORDER BY name
+LIMIT $2
+OFFSET $3
+`
+
+type SearchTrainsByNameSuggestionsParams struct {
+	Column1 sql.NullString `json:"column_1"`
+	Limit   int32          `json:"limit"`
+	Offset  int32          `json:"offset"`
+}
+
+type SearchTrainsByNameSuggestionsRow struct {
+	ID          int64  `json:"id"`
+	ModelNumber string `json:"model_number"`
+	Name        string `json:"name"`
+}
+
+func (q *Queries) SearchTrainsByNameSuggestions(ctx context.Context, arg SearchTrainsByNameSuggestionsParams) ([]SearchTrainsByNameSuggestionsRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchTrainsByNameSuggestions, arg.Column1, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SearchTrainsByNameSuggestionsRow{}
+	for rows.Next() {
+		var i SearchTrainsByNameSuggestionsRow
+		if err := rows.Scan(&i.ID, &i.ModelNumber, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateTrainImageUrl = `-- name: UpdateTrainImageUrl :exec
+
+UPDATE trains SET img_url = $2, version = version + 1
+WHERE id = $1
+`
+
+type UpdateTrainImageUrlParams struct {
+	ID     int64  `json:"id"`
+	ImgUrl string `json:"img_url"`
+}
+
+// IN FUTURE WHEN UPGRADE TO PGX
+// -- name: UpdateTrainsBatch :batchexec
+// UPDATE trains SET value = $2 WHERE id = $1;
+func (q *Queries) UpdateTrainImageUrl(ctx context.Context, arg UpdateTrainImageUrlParams) error {
+	_, err := q.db.ExecContext(ctx, updateTrainImageUrl, arg.ID, arg.ImgUrl)
+	return err
 }
 
 const updateTrainValue = `-- name: UpdateTrainValue :exec

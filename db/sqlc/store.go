@@ -12,6 +12,7 @@ type Store interface {
 	Querier
 	RegisterTx(ctx context.Context, arg CreateUserParams) (RegisterTxResult, error)
 	TradeTx(ctx context.Context, arg TradeTxParams) (TradeTxResult, error)
+	UpdateTrainsValuesBatch(ctx context.Context, ids []int64, values []int64) error
 }
 
 // SQLStore provides all functions to execute SQL queries and transactions
@@ -190,4 +191,18 @@ func (store *SQLStore) TradeTx(ctx context.Context, arg TradeTxParams) (TradeTxR
 
 	return result, err
 
+}
+
+func (store *SQLStore) UpdateTrainsValuesBatch(ctx context.Context, ids []int64, values []int64) error {
+	return store.execTx(ctx, func(q *Queries) error {
+		for i, id := range ids {
+			if err := q.UpdateTrainValue(ctx, UpdateTrainValueParams{
+				ID:    id,
+				Value: values[i],
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }

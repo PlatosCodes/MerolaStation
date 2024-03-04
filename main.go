@@ -8,6 +8,8 @@ import (
 
 	"github.com/PlatosCodes/MerolaStation/api"
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
+	"github.com/PlatosCodes/MerolaStation/mailer"
+	train_data "github.com/PlatosCodes/MerolaStation/train_data/values"
 	"github.com/PlatosCodes/MerolaStation/util"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
@@ -30,7 +32,11 @@ func main() {
 	runDBMigration(config.MigrationURL, config.DBSource)
 
 	store := db.NewStore(conn)
-	server, err := api.NewServer(config, store)
+	server, err := api.NewServer(
+		config,
+		store,
+		mailer.New(config.SmtpHost, config.SmtpPort, config.SmtpUsername,
+			config.SmtpPassword, config.SmtpSender))
 	if err != nil {
 		log.Fatal("cannot create server")
 	}
@@ -43,6 +49,12 @@ func main() {
 	}
 	if trainCount == 0 {
 		loadCSVDataToDB(ctx, server)
+	} else {
+		// FOR EXPORTING TRAIN DATA (VALUES)
+		err := train_data.ExportTrainsToCSV(ctx, server)
+		if err != nil {
+			log.Fatal("cannot get initial train count", err)
+		}
 	}
 
 	err = server.Start(config.ServerAddress)
@@ -63,9 +75,9 @@ func runDBMigration(migrationURL string, dbSource string) {
 }
 
 func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
-	file, err := os.Open("train_data.csv")
+	file, err := os.Open("./train_data/images/final_merge.csv")
 	if err != nil {
-		log.Fatalf("Cannot open '%s': %s\n", "train_data.csv", err.Error())
+		log.Fatalf("Cannot open '%s': %s\n", "./train_data/images/final_merge.csv", err.Error())
 	}
 	defer file.Close()
 
@@ -74,18 +86,47 @@ func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
 
 	lines, err := r.ReadAll()
 	if err != nil {
-		log.Fatalf("Cannot read '%s': %s\n", "train_data.csv", err.Error())
+		log.Fatalf("Cannot read '%s': %s\n", "./train_data/images/final_merge.csv", err.Error())
 	}
 
+	i := 0
+
 	for _, line := range lines {
-		arg := db.CreateTrainParams{
+		i += 1
+		arg := db.CreateImageTrainParams{
 			ModelNumber: line[1],
 			Name:        line[2],
 		}
+		if len(line) < 5 {
+			if len(line) < 4 {
+				log.Printf("Warning: Incomplete data in row: %v\n", line)
+				arg.ImgUrl = ""
+			} else {
+				arg.ImgUrl = line[3]
+			}
+		} else {
+			arg.ImgUrl = line[4]
+		}
 
-		_, err := server.Store.CreateTrain(ctx, arg)
+		_, err := server.Store.CreateImageTrain(ctx, arg)
 		if err != nil {
 			log.Fatalf("Cannot create train: %s\n", err.Error())
 		}
 	}
+	log.Printf("%v trains created:", i)
 }
+
+//For train csv with no images
+// for _, line := range lines {
+// 	arg := db.CreateTrainParams{
+// 		ModelNumber: line[1],
+// 		Name:        line[2],
+// 	}
+
+// 	_, err := server.Store.CreateTrain(ctx, arg)
+// 	if err != nil {
+// 		log.Fatalf("Cannot create train: %s\n", err.Error())
+// 	}
+// }
+
+//For csv that contains trains with image links

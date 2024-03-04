@@ -56,10 +56,10 @@ func TestNewUserResponse(t *testing.T) {
 
 func TestCreateUserAPI(t *testing.T) {
 	user, password := randomUser(t)
-
 	testCases := []struct {
-		name          string
-		body          gin.H
+		name string
+		body gin.H
+
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
@@ -75,10 +75,15 @@ func TestCreateUserAPI(t *testing.T) {
 					Username: user.Username,
 					Email:    user.Email,
 				}
+
 				store.EXPECT().
 					RegisterTx(gomock.Any(), eqCreateUserParams(arg, password)).
 					Times(1).
 					Return(db.RegisterTxResult{}, nil)
+				store.EXPECT().
+					InsertActivationToken(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return(db.ActivationToken{}, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -575,6 +580,15 @@ func randomUser(t *testing.T) (user db.User, password string) {
 		Email:          util.RandomEmail(),
 	}, password
 
+}
+
+func randomToken(t *testing.T, user db.User) (activationToken string, tokenPayload *token.Payload) {
+	maker, err := token.NewPasetoMaker(util.RandomString(32))
+	require.NoError(t, err)
+
+	token, tokenPayload, err := token.Maker.CreateToken(maker, user.ID, user.Username, time.Minute)
+	require.NoError(t, err)
+	return token, tokenPayload
 }
 
 func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user db.User) {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
+	"github.com/PlatosCodes/MerolaStation/mailer"
 	"github.com/PlatosCodes/MerolaStation/token"
 	"github.com/PlatosCodes/MerolaStation/util"
 	"github.com/gin-contrib/cors"
@@ -15,10 +16,11 @@ type Server struct {
 	config     util.Config
 	Store      db.Store
 	tokenMaker token.Maker
+	mailer     *mailer.Mailer
 	router     *gin.Engine
 }
 
-func NewServer(config util.Config, store db.Store) (*Server, error) {
+func NewServer(config util.Config, store db.Store, mailer *mailer.Mailer) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
@@ -27,6 +29,7 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 		config:     config,
 		Store:      store,
 		tokenMaker: tokenMaker,
+		mailer:     mailer,
 	}
 
 	server.setupRouter()
@@ -37,7 +40,7 @@ func (server *Server) setupRouter() {
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:3000"} // This should be your frontend's address
+	config.AllowOrigins = []string{server.config.FrontendAddress3, server.config.FrontendAddress4} // This should be your frontend's address
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 
@@ -46,7 +49,11 @@ func (server *Server) setupRouter() {
 
 	router.Use(cors.New(config))
 
-	router.POST("/users", server.createUser)
+	router.POST("/users", func(ctx *gin.Context) {
+		server.createUser(ctx, nil) // Passing nil will use the default mailer
+	})
+	router.POST("/activate", server.activateUser)
+
 	router.POST("/users/login", server.loginUser)
 	router.POST("/renew_access", server.RenewAccessToken)
 	router.GET("/check_session", server.CheckUserSession)
@@ -64,6 +71,9 @@ func (server *Server) setupRouter() {
 
 	authRoutes.GET("/trains/model/:model_number", server.getTrainByModel)
 	authRoutes.GET("/trains/search", server.searchTrainsByModelNumberSuggestions)
+	authRoutes.GET("/trains/search_by_name", server.searchTrainsByNameSuggestions)
+
+	authRoutes.GET("/trains/search_with_status", server.searchTrainSuggestionsWithStatus)
 
 	authRoutes.GET("/trains/all", server.listTrain)
 
@@ -71,7 +81,8 @@ func (server *Server) setupRouter() {
 	// authRoutes.GET("/trains", server.listUserTrains)
 	authRoutes.GET("/trains", server.listUserTrainsWithPages)
 
-	authRoutes.PUT("/trains", server.updateTrainValue)
+	authRoutes.PUT("/trains/value", server.updateTrainValue)
+	authRoutes.PUT("/trains/values/batch", server.updateTrainsValuesBatch)
 
 	authRoutes.GET("/users/:id/collection", server.listUserCollection)
 	authRoutes.GET("/users/:id/collection/:train_id", server.getUserCollectionWithWishlistStatus)

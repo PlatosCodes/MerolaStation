@@ -47,6 +47,7 @@ resetdb:
 	&& migrate -path db/migration -database "${DB_URL}" -verbose up
 
 mock:
-	mockgen -package mockdb -destination db/mock/store.go github.com/PlatosCodes/MerolaStation/db/sqlc Store
+	mockgen -package mockdb -destination db/mock/store.go github.com/PlatosCodes/MerolaStation/db/sqlc Store \
+	&& mockgen -package mockmailer -destination mailer/mock/mailer.go github.com/PlatosCodes/MerolaStation/mailer IMailer
 	
 .PHONY: postgres createdb dropdb migrateup migrateup1 migratedown migratedown1 new_migration db_docs db_schema sqlc test server resetdb mock

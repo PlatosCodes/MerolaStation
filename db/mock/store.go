@@ -6,6 +6,7 @@ package mockdb
 
 import (
 	context "context"
+	sql "database/sql"
 	reflect "reflect"
 
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
@@ -36,6 +37,20 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
+// ActivateUser mocks base method.
+func (m *MockStore) ActivateUser(arg0 context.Context, arg1 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ActivateUser", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ActivateUser indicates an expected call of ActivateUser.
+func (mr *MockStoreMockRecorder) ActivateUser(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ActivateUser", reflect.TypeOf((*MockStore)(nil).ActivateUser), arg0, arg1)
+}
+
 // BlockSession mocks base method.
 func (m *MockStore) BlockSession(arg0 context.Context, arg1 uuid.UUID) error {
 	m.ctrl.T.Helper()
@@ -63,6 +78,21 @@ func (m *MockStore) CreateCollectionTrain(arg0 context.Context, arg1 db.CreateCo
 func (mr *MockStoreMockRecorder) CreateCollectionTrain(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCollectionTrain", reflect.TypeOf((*MockStore)(nil).CreateCollectionTrain), arg0, arg1)
+}
+
+// CreateImageTrain mocks base method.
+func (m *MockStore) CreateImageTrain(arg0 context.Context, arg1 db.CreateImageTrainParams) (db.Train, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateImageTrain", arg0, arg1)
+	ret0, _ := ret[0].(db.Train)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateImageTrain indicates an expected call of CreateImageTrain.
+func (mr *MockStoreMockRecorder) CreateImageTrain(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateImageTrain", reflect.TypeOf((*MockStore)(nil).CreateImageTrain), arg0, arg1)
 }
 
 // CreateSession mocks base method.
@@ -155,6 +185,20 @@ func (mr *MockStoreMockRecorder) CreateWishlistTrain(arg0, arg1 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWishlistTrain", reflect.TypeOf((*MockStore)(nil).CreateWishlistTrain), arg0, arg1)
 }
 
+// DeleteActivationToken mocks base method.
+func (m *MockStore) DeleteActivationToken(arg0 context.Context, arg1 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteActivationToken", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteActivationToken indicates an expected call of DeleteActivationToken.
+func (mr *MockStoreMockRecorder) DeleteActivationToken(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteActivationToken", reflect.TypeOf((*MockStore)(nil).DeleteActivationToken), arg0, arg1)
+}
+
 // DeleteCollectionTrain mocks base method.
 func (m *MockStore) DeleteCollectionTrain(arg0 context.Context, arg1 db.DeleteCollectionTrainParams) error {
 	m.ctrl.T.Helper()
@@ -239,6 +283,21 @@ func (mr *MockStoreMockRecorder) DeleteWishlistTrain(arg0, arg1 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteWishlistTrain", reflect.TypeOf((*MockStore)(nil).DeleteWishlistTrain), arg0, arg1)
 }
 
+// GetActivationToken mocks base method.
+func (m *MockStore) GetActivationToken(arg0 context.Context, arg1 string) (db.ActivationToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetActivationToken", arg0, arg1)
+	ret0, _ := ret[0].(db.ActivationToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetActivationToken indicates an expected call of GetActivationToken.
+func (mr *MockStoreMockRecorder) GetActivationToken(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActivationToken", reflect.TypeOf((*MockStore)(nil).GetActivationToken), arg0, arg1)
+}
+
 // GetCollectionTrain mocks base method.
 func (m *MockStore) GetCollectionTrain(arg0 context.Context, arg1 db.GetCollectionTrainParams) (db.CollectionTrain, error) {
 	m.ctrl.T.Helper()
@@ -312,6 +371,66 @@ func (m *MockStore) GetSession(arg0 context.Context, arg1 uuid.UUID) (db.Session
 func (mr *MockStoreMockRecorder) GetSession(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSession", reflect.TypeOf((*MockStore)(nil).GetSession), arg0, arg1)
+}
+
+// GetTotalCollectionValue mocks base method.
+func (m *MockStore) GetTotalCollectionValue(arg0 context.Context, arg1 int64) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTotalCollectionValue", arg0, arg1)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTotalCollectionValue indicates an expected call of GetTotalCollectionValue.
+func (mr *MockStoreMockRecorder) GetTotalCollectionValue(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTotalCollectionValue", reflect.TypeOf((*MockStore)(nil).GetTotalCollectionValue), arg0, arg1)
+}
+
+// GetTotalSearchSuggestionsByModelNumberTrainCount mocks base method.
+func (m *MockStore) GetTotalSearchSuggestionsByModelNumberTrainCount(arg0 context.Context, arg1 sql.NullString) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTotalSearchSuggestionsByModelNumberTrainCount", arg0, arg1)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTotalSearchSuggestionsByModelNumberTrainCount indicates an expected call of GetTotalSearchSuggestionsByModelNumberTrainCount.
+func (mr *MockStoreMockRecorder) GetTotalSearchSuggestionsByModelNumberTrainCount(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTotalSearchSuggestionsByModelNumberTrainCount", reflect.TypeOf((*MockStore)(nil).GetTotalSearchSuggestionsByModelNumberTrainCount), arg0, arg1)
+}
+
+// GetTotalSearchSuggestionsByNameTrainCount mocks base method.
+func (m *MockStore) GetTotalSearchSuggestionsByNameTrainCount(arg0 context.Context, arg1 sql.NullString) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTotalSearchSuggestionsByNameTrainCount", arg0, arg1)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTotalSearchSuggestionsByNameTrainCount indicates an expected call of GetTotalSearchSuggestionsByNameTrainCount.
+func (mr *MockStoreMockRecorder) GetTotalSearchSuggestionsByNameTrainCount(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTotalSearchSuggestionsByNameTrainCount", reflect.TypeOf((*MockStore)(nil).GetTotalSearchSuggestionsByNameTrainCount), arg0, arg1)
+}
+
+// GetTotalSearchSuggestionsTrainCount mocks base method.
+func (m *MockStore) GetTotalSearchSuggestionsTrainCount(arg0 context.Context, arg1 db.GetTotalSearchSuggestionsTrainCountParams) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTotalSearchSuggestionsTrainCount", arg0, arg1)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTotalSearchSuggestionsTrainCount indicates an expected call of GetTotalSearchSuggestionsTrainCount.
+func (mr *MockStoreMockRecorder) GetTotalSearchSuggestionsTrainCount(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTotalSearchSuggestionsTrainCount", reflect.TypeOf((*MockStore)(nil).GetTotalSearchSuggestionsTrainCount), arg0, arg1)
 }
 
 // GetTotalTrainCount mocks base method.
@@ -492,6 +611,21 @@ func (m *MockStore) GetWishlistTrain(arg0 context.Context, arg1 db.GetWishlistTr
 func (mr *MockStoreMockRecorder) GetWishlistTrain(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWishlistTrain", reflect.TypeOf((*MockStore)(nil).GetWishlistTrain), arg0, arg1)
+}
+
+// InsertActivationToken mocks base method.
+func (m *MockStore) InsertActivationToken(arg0 context.Context, arg1 db.InsertActivationTokenParams) (db.ActivationToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertActivationToken", arg0, arg1)
+	ret0, _ := ret[0].(db.ActivationToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InsertActivationToken indicates an expected call of InsertActivationToken.
+func (mr *MockStoreMockRecorder) InsertActivationToken(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertActivationToken", reflect.TypeOf((*MockStore)(nil).InsertActivationToken), arg0, arg1)
 }
 
 // ListAllUserTradeOffers mocks base method.
@@ -734,6 +868,51 @@ func (mr *MockStoreMockRecorder) RegisterTx(arg0, arg1 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterTx", reflect.TypeOf((*MockStore)(nil).RegisterTx), arg0, arg1)
 }
 
+// SearchTrainSuggestionsByModelNumberWithListStatus mocks base method.
+func (m *MockStore) SearchTrainSuggestionsByModelNumberWithListStatus(arg0 context.Context, arg1 db.SearchTrainSuggestionsByModelNumberWithListStatusParams) ([]db.SearchTrainSuggestionsByModelNumberWithListStatusRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchTrainSuggestionsByModelNumberWithListStatus", arg0, arg1)
+	ret0, _ := ret[0].([]db.SearchTrainSuggestionsByModelNumberWithListStatusRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchTrainSuggestionsByModelNumberWithListStatus indicates an expected call of SearchTrainSuggestionsByModelNumberWithListStatus.
+func (mr *MockStoreMockRecorder) SearchTrainSuggestionsByModelNumberWithListStatus(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTrainSuggestionsByModelNumberWithListStatus", reflect.TypeOf((*MockStore)(nil).SearchTrainSuggestionsByModelNumberWithListStatus), arg0, arg1)
+}
+
+// SearchTrainSuggestionsByNameWithListStatus mocks base method.
+func (m *MockStore) SearchTrainSuggestionsByNameWithListStatus(arg0 context.Context, arg1 db.SearchTrainSuggestionsByNameWithListStatusParams) ([]db.SearchTrainSuggestionsByNameWithListStatusRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchTrainSuggestionsByNameWithListStatus", arg0, arg1)
+	ret0, _ := ret[0].([]db.SearchTrainSuggestionsByNameWithListStatusRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchTrainSuggestionsByNameWithListStatus indicates an expected call of SearchTrainSuggestionsByNameWithListStatus.
+func (mr *MockStoreMockRecorder) SearchTrainSuggestionsByNameWithListStatus(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTrainSuggestionsByNameWithListStatus", reflect.TypeOf((*MockStore)(nil).SearchTrainSuggestionsByNameWithListStatus), arg0, arg1)
+}
+
+// SearchTrainSuggestionsWithListStatus mocks base method.
+func (m *MockStore) SearchTrainSuggestionsWithListStatus(arg0 context.Context, arg1 db.SearchTrainSuggestionsWithListStatusParams) ([]db.SearchTrainSuggestionsWithListStatusRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchTrainSuggestionsWithListStatus", arg0, arg1)
+	ret0, _ := ret[0].([]db.SearchTrainSuggestionsWithListStatusRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchTrainSuggestionsWithListStatus indicates an expected call of SearchTrainSuggestionsWithListStatus.
+func (mr *MockStoreMockRecorder) SearchTrainSuggestionsWithListStatus(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTrainSuggestionsWithListStatus", reflect.TypeOf((*MockStore)(nil).SearchTrainSuggestionsWithListStatus), arg0, arg1)
+}
+
 // SearchTrainsByModelNumberSuggestions mocks base method.
 func (m *MockStore) SearchTrainsByModelNumberSuggestions(arg0 context.Context, arg1 db.SearchTrainsByModelNumberSuggestionsParams) ([]db.SearchTrainsByModelNumberSuggestionsRow, error) {
 	m.ctrl.T.Helper()
@@ -747,6 +926,21 @@ func (m *MockStore) SearchTrainsByModelNumberSuggestions(arg0 context.Context, a
 func (mr *MockStoreMockRecorder) SearchTrainsByModelNumberSuggestions(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTrainsByModelNumberSuggestions", reflect.TypeOf((*MockStore)(nil).SearchTrainsByModelNumberSuggestions), arg0, arg1)
+}
+
+// SearchTrainsByNameSuggestions mocks base method.
+func (m *MockStore) SearchTrainsByNameSuggestions(arg0 context.Context, arg1 db.SearchTrainsByNameSuggestionsParams) ([]db.SearchTrainsByNameSuggestionsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchTrainsByNameSuggestions", arg0, arg1)
+	ret0, _ := ret[0].([]db.SearchTrainsByNameSuggestionsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchTrainsByNameSuggestions indicates an expected call of SearchTrainsByNameSuggestions.
+func (mr *MockStoreMockRecorder) SearchTrainsByNameSuggestions(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTrainsByNameSuggestions", reflect.TypeOf((*MockStore)(nil).SearchTrainsByNameSuggestions), arg0, arg1)
 }
 
 // TradeTx mocks base method.
@@ -794,6 +988,20 @@ func (mr *MockStoreMockRecorder) UpdatePassword(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePassword", reflect.TypeOf((*MockStore)(nil).UpdatePassword), arg0, arg1)
 }
 
+// UpdateTrainImageUrl mocks base method.
+func (m *MockStore) UpdateTrainImageUrl(arg0 context.Context, arg1 db.UpdateTrainImageUrlParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateTrainImageUrl", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateTrainImageUrl indicates an expected call of UpdateTrainImageUrl.
+func (mr *MockStoreMockRecorder) UpdateTrainImageUrl(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTrainImageUrl", reflect.TypeOf((*MockStore)(nil).UpdateTrainImageUrl), arg0, arg1)
+}
+
 // UpdateTrainValue mocks base method.
 func (m *MockStore) UpdateTrainValue(arg0 context.Context, arg1 db.UpdateTrainValueParams) error {
 	m.ctrl.T.Helper()
@@ -806,6 +1014,20 @@ func (m *MockStore) UpdateTrainValue(arg0 context.Context, arg1 db.UpdateTrainVa
 func (mr *MockStoreMockRecorder) UpdateTrainValue(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTrainValue", reflect.TypeOf((*MockStore)(nil).UpdateTrainValue), arg0, arg1)
+}
+
+// UpdateTrainsValuesBatch mocks base method.
+func (m *MockStore) UpdateTrainsValuesBatch(arg0 context.Context, arg1, arg2 []int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateTrainsValuesBatch", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateTrainsValuesBatch indicates an expected call of UpdateTrainsValuesBatch.
+func (mr *MockStoreMockRecorder) UpdateTrainsValuesBatch(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTrainsValuesBatch", reflect.TypeOf((*MockStore)(nil).UpdateTrainsValuesBatch), arg0, arg1, arg2)
 }
 
 // UpdateUser mocks base method.

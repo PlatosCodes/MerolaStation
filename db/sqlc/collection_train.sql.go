@@ -139,6 +139,24 @@ func (q *Queries) GetCollectionTrainforUpdateByID(ctx context.Context, id int64)
 	return i, err
 }
 
+const getTotalCollectionValue = `-- name: GetTotalCollectionValue :one
+SELECT 
+    SUM(trains.value) AS total_value 
+FROM 
+    collection_trains
+JOIN 
+    trains ON trains.id = collection_trains.train_id
+WHERE 
+    collection_trains.user_id = $1
+`
+
+func (q *Queries) GetTotalCollectionValue(ctx context.Context, userID int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getTotalCollectionValue, userID)
+	var total_value int64
+	err := row.Scan(&total_value)
+	return total_value, err
+}
+
 const getUserCollectionWithWishlistStatus = `-- name: GetUserCollectionWithWishlistStatus :many
 SELECT 
     c.id, c.user_id, c.train_id, c.created_at, c.times_traded,
@@ -273,7 +291,7 @@ func (q *Queries) ListUserCollection(ctx context.Context, arg ListUserCollection
 
 const listUserTrains = `-- name: ListUserTrains :many
 SELECT 
-    trains.id, trains.model_number, trains.name, trains.value, trains.created_at, trains.version, trains.last_edited_at, 
+    trains.id, trains.model_number, trains.name, trains.value, trains.img_url, trains.created_at, trains.version, trains.last_edited_at, 
     CASE WHEN collection_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_collection,
     CASE WHEN wishlist_trains.train_id IS NULL THEN FALSE ELSE TRUE END AS is_in_wishlist
 FROM 
@@ -299,6 +317,7 @@ type ListUserTrainsRow struct {
 	ModelNumber    string    `json:"model_number"`
 	Name           string    `json:"name"`
 	Value          int64     `json:"value"`
+	ImgUrl         string    `json:"img_url"`
 	CreatedAt      time.Time `json:"created_at"`
 	Version        int64     `json:"version"`
 	LastEditedAt   time.Time `json:"last_edited_at"`
@@ -320,6 +339,7 @@ func (q *Queries) ListUserTrains(ctx context.Context, arg ListUserTrainsParams) 
 			&i.ModelNumber,
 			&i.Name,
 			&i.Value,
+			&i.ImgUrl,
 			&i.CreatedAt,
 			&i.Version,
 			&i.LastEditedAt,
