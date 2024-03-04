@@ -9,6 +9,7 @@ import (
 	"github.com/PlatosCodes/MerolaStation/api"
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
 	"github.com/PlatosCodes/MerolaStation/mailer"
+	train_data "github.com/PlatosCodes/MerolaStation/train_data/values"
 	"github.com/PlatosCodes/MerolaStation/util"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
@@ -48,6 +49,12 @@ func main() {
 	}
 	if trainCount == 0 {
 		loadCSVDataToDB(ctx, server)
+	} else {
+		// FOR EXPORTING TRAIN DATA (VALUES)
+		err := train_data.ExportTrainsToCSV(ctx, server)
+		if err != nil {
+			log.Fatal("cannot get initial train count", err)
+		}
 	}
 
 	err = server.Start(config.ServerAddress)
@@ -68,9 +75,9 @@ func runDBMigration(migrationURL string, dbSource string) {
 }
 
 func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
-	file, err := os.Open("./trains/final_merge.csv")
+	file, err := os.Open("./train_data/images/final_merge.csv")
 	if err != nil {
-		log.Fatalf("Cannot open '%s': %s\n", "./trains/final_merge.csv", err.Error())
+		log.Fatalf("Cannot open '%s': %s\n", "./train_data/images/final_merge.csv", err.Error())
 	}
 	defer file.Close()
 
@@ -79,7 +86,7 @@ func loadCSVDataToDB(ctx *gin.Context, server *api.Server) {
 
 	lines, err := r.ReadAll()
 	if err != nil {
-		log.Fatalf("Cannot read '%s': %s\n", "./trains/final_merge.csv.csv", err.Error())
+		log.Fatalf("Cannot read '%s': %s\n", "./train_data/images/final_merge.csv", err.Error())
 	}
 
 	i := 0

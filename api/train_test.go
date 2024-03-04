@@ -129,7 +129,7 @@ func TestUpdateTrainValueAPI(t *testing.T) {
 	user, _ := randomUser(t)
 	userID := user.ID
 	username := user.Username
-
+	newValue := int64(1000)
 	train := RandomTrain()
 
 	testCases := []struct {
@@ -143,14 +143,14 @@ func TestUpdateTrainValueAPI(t *testing.T) {
 		{
 			name:     "OK",
 			trainID:  train.ID,
-			newValue: 1000,
+			newValue: newValue,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, userID, username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				arg := db.UpdateTrainValueParams{
 					ID:    train.ID,
-					Value: 1000,
+					Value: newValue,
 				}
 				store.EXPECT().
 					UpdateTrainValue(gomock.Any(), gomock.Eq(arg)).
@@ -237,7 +237,7 @@ func TestUpdateTrainValueAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := "/trains"
+			url := "/trains/value"
 			requestBody, err := json.Marshal(map[string]int64{
 				"id":    tc.trainID,
 				"value": tc.newValue,
@@ -557,7 +557,7 @@ func TestListTrainAPI(t *testing.T) {
 
 			// url := "/Trains"
 
-			url := fmt.Sprintf("/trains?page_id=%d&page_size=%d", tc.listTrainRequest.PageID, tc.listTrainRequest.PageSize)
+			url := fmt.Sprintf("/trains/all?page_id=%d&page_size=%d", tc.listTrainRequest.PageID, tc.listTrainRequest.PageSize)
 
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
@@ -590,3 +590,135 @@ func RandomTrain() db.Train {
 		Version:     1,
 	}
 }
+
+//Have to EDIT THIS FIRST -- it is copied from ListTrainsAPI and not set up for User Trains
+// func TestListUserTrainsAPI(t *testing.T) {
+// 	user, _ := randomUser(t)
+// 	userID := user.ID
+// 	username := user.Username
+// 	limit := int32(5)
+// 	offset := int32(1)
+
+// 	testCases := []struct {
+// 		name          string
+// 		userID        int64
+// 		limit         int32
+// 		offset        int32
+// 		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
+// 		buildStubs    func(store *mockdb.MockStore)
+// 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
+// 	}{
+// 		{
+// 			name: "OK",
+// 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+// 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, userID, username, time.Minute)
+// 			},
+// 			buildStubs: func(store *mockdb.MockStore) {
+// 				arg := db.ListUserTrainsParams{
+// 					UserID: userID,
+// 					Limit:  limit,
+// 					Offset: (offset - 1) * limit,
+// 				}
+// 				store.EXPECT().
+// 					ListUserTrains(gomock.Any(), gomock.Eq(arg)).
+// 					Times(1).
+// 					Return([]db.ListUserTrainsRow{}, nil)
+// 			},
+// 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+// 				require.Equal(t, http.StatusOK, recorder.Code)
+// 			},
+// 		},
+// 		// {
+// 		// 	name: "NotFound",
+// 		// 	setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+// 		// 		addAuthorization(t, request, tokenMaker, authorizationTypeBearer, userID, username, time.Minute)
+// 		// 	},
+// 		// 	buildStubs: func(store *mockdb.MockStore) {
+// 		// 		arg := db.ListUserTrainsParams{
+// 		// 			UserID: userID,
+// 		// 			Limit:  limit,
+// 		// 			Offset: (offset - 1) * limit,
+// 		// 		}
+// 		// 		store.EXPECT().
+// 		// 			ListUserTrains(gomock.Any(), gomock.Eq(arg)).
+// 		// 			Times(1).
+// 		// 			Return([]db.ListUserTrainsRow{}, sql.ErrNoRows)
+// 		// 	},
+// 		// 	checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+// 		// 		require.Equal(t, http.StatusNotFound, recorder.Code)
+// 		// 	},
+// 		// },
+// 		// {
+// 		// 	name: "InternalServerError",
+// 		// 	setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+// 		// 		addAuthorization(t, request, tokenMaker, authorizationTypeBearer, userID, username, time.Minute)
+// 		// 	},
+// 		// 	buildStubs: func(store *mockdb.MockStore) {
+// 		// 		arg := db.ListUserTrainsParams{
+// 		// 			UserID: userID,
+// 		// 			Limit:  limit,
+// 		// 			Offset: (offset - 1) * limit,
+// 		// 		}
+// 		// 		store.EXPECT().
+// 		// 			ListUserTrains(gomock.Any(), gomock.Eq(arg)).
+// 		// 			Times(1).
+// 		// 			Return([]db.ListUserTrainsRow{}, sql.ErrConnDone)
+// 		// 	},
+// 		// 	checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+// 		// 		require.Equal(t, http.StatusInternalServerError, recorder.Code)
+// 		// 	},
+// 		// },
+// 		// {
+// 		// 	name: "InvalidPageID",
+// 		// 	setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+// 		// 		addAuthorization(t, request, tokenMaker, authorizationTypeBearer, userID, username, time.Minute)
+// 		// 	},
+// 		// 	buildStubs: func(store *mockdb.MockStore) {
+// 		// 		arg := db.ListUserTrainsParams{
+// 		// 			UserID: userID,
+// 		// 			Limit:  limit,
+// 		// 			Offset: (offset - 1) * limit,
+// 		// 		}
+// 		// 		store.EXPECT().
+// 		// 			ListUserTrains(gomock.Any(), gomock.Eq(arg)).
+// 		// 			Times(0)
+// 		// 	},
+// 		// 	checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+// 		// 		require.Equal(t, http.StatusBadRequest, recorder.Code)
+// 		// 	},
+// 		// },
+// 	}
+
+// 	for i := range testCases {
+// 		tc := testCases[i]
+// 		t.Run(tc.name, func(t *testing.T) {
+// 			ctrl := gomock.NewController(t)
+// 			defer ctrl.Finish()
+
+// 			store := mockdb.NewMockStore(ctrl)
+// 			tc.buildStubs(store)
+
+// 			// start test server and send request
+// 			server := newTestServer(t, store)
+// 			recorder := httptest.NewRecorder()
+
+// 			// requestBody, err := json.Marshal(map[int32]int32{
+// 			// 	"page_id": tc.listTrainRequest.PageID,
+// 			// })
+// 			// require.NoError(t, err)
+
+// 			// url := "/Trains"
+
+// 			url := fmt.Sprintf("/trains?page_id=%d&page_size=%d", tc.offset, tc.limit)
+
+// 			request, err := http.NewRequest(http.MethodGet, url, nil)
+// 			require.NoError(t, err)
+
+// 			tc.setupAuth(t, request, server.tokenMaker)
+
+// 			server.router.ServeHTTP(recorder, request)
+// 			tc.checkResponse(t, recorder)
+// 		})
+
+// 	}
+// }

@@ -86,9 +86,10 @@ func (server *Server) listUserCollection(ctx *gin.Context) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
-
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
+		if err == sql.ErrConnDone {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
 	}
 
 	trains := []db.GetTrainDetailRow{}
@@ -99,8 +100,10 @@ func (server *Server) listUserCollection(ctx *gin.Context) {
 				ctx.JSON(http.StatusNotFound, errorResponse(err))
 				return
 			}
-			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-			return
+			if err == sql.ErrConnDone {
+				ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+				return
+			}
 		}
 		trains = append(trains, train)
 	}

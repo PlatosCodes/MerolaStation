@@ -8,6 +8,7 @@ import (
 	"time"
 
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
+	"github.com/PlatosCodes/MerolaStation/mailer"
 	"github.com/PlatosCodes/MerolaStation/token"
 	"github.com/PlatosCodes/MerolaStation/util"
 	"github.com/gin-gonic/gin"
@@ -40,7 +41,14 @@ func newUserResponse(user db.User) userResponse {
 }
 
 // createUser uses RegisterTX to create a new user
-func (server *Server) createUser(ctx *gin.Context) {
+func (server *Server) createUser(ctx *gin.Context, mailerOverride mailer.IMailer) {
+	var mailerToUse mailer.IMailer
+	if mailerOverride != nil {
+		mailerToUse = mailerOverride
+	} else {
+		mailerToUse = server.mailer
+	}
+
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -100,7 +108,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 	}
 
 	// can make async later
-	err = server.mailer.Send(registerResult.User.Email, "user_welcome.tmpl", dbs)
+	err = mailerToUse.Send(registerResult.User.Email, "user_welcome.tmpl", dbs)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

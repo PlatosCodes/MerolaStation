@@ -49,7 +49,9 @@ func (server *Server) setupRouter() {
 
 	router.Use(cors.New(config))
 
-	router.POST("/users", server.createUser)
+	router.POST("/users", func(ctx *gin.Context) {
+		server.createUser(ctx, nil) // Passing nil will use the default mailer
+	})
 	router.POST("/activate", server.activateUser)
 
 	router.POST("/users/login", server.loginUser)

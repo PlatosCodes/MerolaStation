@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 
 	db "github.com/PlatosCodes/MerolaStation/db/sqlc"
@@ -130,7 +131,6 @@ func (server *Server) listTrain(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-
 	_ = ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	arg := db.ListTrainsParams{
@@ -165,12 +165,12 @@ func (server *Server) listUserTrainsWithPages(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	arg := db.ListUserTrainsParams{
-		UserID: authPayload.UserID, // <-- Include the UserID in the params
+		UserID: authPayload.UserID,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
-	trains, err := server.Store.ListUserTrains(ctx, arg) // <-- Call the new ListUserTrains method
+	trains, err := server.Store.ListUserTrains(ctx, arg) //
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse((err)))
@@ -206,7 +206,7 @@ func (server *Server) updateTrainValue(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-
+	log.Println("Request:", req)
 	_ = ctx.MustGet(authorizationPayloadKey).(*token.Payload).UserID
 
 	arg := db.UpdateTrainValueParams{
@@ -450,5 +450,6 @@ func (server *Server) searchTrainSuggestionsWithStatus(ctx *gin.Context) {
 		TotalCount: totalCount,
 		Trains:     trains,
 	}
+	log.Println(response)
 	ctx.JSON(http.StatusOK, response)
 }

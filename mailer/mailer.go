@@ -23,6 +23,12 @@ type Mailer struct {
 	sender string
 }
 
+type IMailer interface {
+	Send(recipient, templateFile string, data interface{}) error
+}
+
+var _ IMailer = (*Mailer)(nil)
+
 func New(host string, port int, name string, password string, sender string) *Mailer {
 	dialer := mail.NewDialer(host, port, name, password)
 	dialer.Timeout = 5 * time.Second
