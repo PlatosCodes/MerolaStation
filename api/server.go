@@ -40,7 +40,7 @@ func (server *Server) setupRouter() {
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:3000"} // This should be your frontend's address
+	config.AllowOrigins = []string{server.config.FrontendAddress3, server.config.FrontendAddress4} // This should be your frontend's address
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 
